@@ -8,6 +8,7 @@ from typing import List
 import database
 import schemas
 import auth
+from permissions import can_message_user
 
 app = FastAPI(title="Tasker Platform API")
 
@@ -330,6 +331,21 @@ def send_message(
     current_user: database.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
+    # Validate messaging permission
+    has_permission = can_message_user(
+        db=db,
+        sender_id=current_user.id,
+        receiver_id=message.receiver_id
+    )
+    
+    if not has_permission:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to message this user. "
+                   "You can only message users with whom you have an active "
+                   "bid, offer, or agreement relationship."
+        )
+    
     db_message = database.Message(
         sender_id=current_user.id,
         receiver_id=message.receiver_id,

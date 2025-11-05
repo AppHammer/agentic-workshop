@@ -17,9 +17,8 @@ This command orchestrates a comprehensive workflow to implement, test, and valid
    - Understands technical scope and dependencies
 
 2. **Create a new branch**
-   - Make sure you are on the main branch before creating a new branch
    - Create a new branch with the issue number using `git checkout -b <issue_number>-descriptive-name`
-   - Commit current uncommitted files
+   - Commit current uncommitted files into the new branch
 
 3. **Implementation**:
    - Use a coding agent specialized in the relevant technology stack if available

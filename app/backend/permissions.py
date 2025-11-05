@@ -68,7 +68,9 @@ def can_message_user(
     
     # Check for bids (tasker bid on customer's task, bidirectional)
     # Bid connects a tasker to a customer's task
+    # Only active (non-withdrawn) bids count
     bid = db.query(Bid).join(Task).filter(
+        Bid.withdrawn == False,
         or_(
             # Sender is tasker who bid, receiver is task owner (customer)
             and_(
@@ -139,13 +141,14 @@ def get_messageable_users(db: Session, user_id: int) -> list[int]:
     messageable_ids.update(uid[0] for uid in agreements_as_customer)
     
     # Get users from bids (as tasker or task owner)
+    # Only include non-withdrawn bids
     bids_as_tasker = db.query(Task.customer_id).join(
         Bid, Bid.task_id == Task.id
-    ).filter(Bid.tasker_id == user_id).all()
+    ).filter(Bid.tasker_id == user_id, Bid.withdrawn == False).all()
     
     bids_as_customer = db.query(Bid.tasker_id).join(
         Task, Bid.task_id == Task.id
-    ).filter(Task.customer_id == user_id).all()
+    ).filter(Task.customer_id == user_id, Bid.withdrawn == False).all()
     
     messageable_ids.update(uid[0] for uid in bids_as_tasker)
     messageable_ids.update(uid[0] for uid in bids_as_customer)

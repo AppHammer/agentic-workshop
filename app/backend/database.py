@@ -85,6 +85,7 @@ class Bid(Base):
     tasker_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     amount = Column(Float, nullable=False)
     message = Column(Text)
+    withdrawn = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

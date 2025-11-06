@@ -9,6 +9,7 @@ import database
 import schemas
 import auth
 from permissions import can_message_user
+from database import Task, Bid, Offer, Agreement, User, UserRole
 
 app = FastAPI(title="Tasker Platform API")
 
@@ -345,6 +346,45 @@ def send_message(
                    "You can only message users with whom you have an active "
                    "bid, offer, or agreement relationship."
         )
+    
+    # Validate task_id if provided
+    if message.task_id is not None:
+        task = db.query(Task).filter(Task.id == message.task_id).first()
+        if not task:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Task with id {message.task_id} not found"
+            )
+        
+        # Verify user has permission to discuss this task
+        # User must be task creator, have bid, have offer, or have agreement
+        if current_user.role == UserRole.CUSTOMER:
+            if task.customer_id != current_user.id:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You do not have permission to discuss this task"
+                )
+        else:  # Tasker
+            # Check for bid, offer, or agreement on this specific task
+            has_task_permission = (
+                db.query(Bid).filter(
+                    Bid.task_id == message.task_id,
+                    Bid.tasker_id == current_user.id
+                ).first() is not None or
+                db.query(Offer).filter(
+                    Offer.task_id == message.task_id,
+                    Offer.tasker_id == current_user.id
+                ).first() is not None or
+                db.query(Agreement).filter(
+                    Agreement.task_id == message.task_id,
+                    Agreement.tasker_id == current_user.id
+                ).first() is not None
+            )
+            if not has_task_permission:
+                raise HTTPException(
+                    status_code=403,
+                    detail="You do not have permission to discuss this task"
+                )
     
     db_message = database.Message(
         sender_id=current_user.id,

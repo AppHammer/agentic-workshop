@@ -495,6 +495,410 @@ def test_message_with_valid_task_id(client, test_users, auth_headers):
     db.close()
 
 
+def test_get_messages_with_task_details(client, test_users, auth_headers):
+    """Test GET /messages includes task details when task_id is present."""
+    db = TestingSessionLocal()
+    
+    # Create task
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Fix my sink",
+        description="Leaky faucet needs repair",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0,
+        status=TaskStatus.OPEN
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    task_id = task.id  # Store task_id before closing session
+    
+    # Create bid relationship
+    bid = Bid(
+        task_id=task_id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message linked to task
+    from database import Message
+    message = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task_id,
+        content="I can fix your sink"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) > 0
+    
+    # Find the message with task
+    task_message = next((m for m in messages if m["task_id"] == task_id), None)
+    assert task_message is not None
+    
+    # Verify task details are included
+    assert task_message["task_title"] == "Fix my sink"
+    assert task_message["task_status"] == TaskStatus.OPEN.value
+    assert task_message["content"] == "I can fix your sink"
+
+
+def test_get_messages_without_task_details(client, test_users, auth_headers):
+    """Test GET /messages response when task_id is null (no task context)."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid to establish relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message WITHOUT task_id (general message)
+    from database import Message
+    message = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=None,
+        content="General message"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) > 0
+    
+    # Find the message without task
+    general_message = next((m for m in messages if m["task_id"] is None), None)
+    assert general_message is not None
+    
+    # Verify task details are null when no task
+    assert general_message["task_title"] is None
+    assert general_message["task_status"] is None
+    assert general_message["content"] == "General message"
+
+
+def test_get_messages_performance_with_many_messages(client, test_users, auth_headers):
+    """Test query performance with 100+ messages using JOIN."""
+    db = TestingSessionLocal()
+    
+    # Create tasks
+    tasks = []
+    for i in range(10):
+        task = Task(
+            customer_id=test_users["customer"].id,
+            title=f"Task {i}",
+            description=f"Description {i}",
+            location="Test Location",
+            date=datetime.utcnow() + timedelta(days=i+1),
+            budget=100.0 + i,
+            status=TaskStatus.OPEN if i % 2 == 0 else TaskStatus.IN_PROGRESS
+        )
+        db.add(task)
+        tasks.append(task)
+    
+    db.commit()
+    for task in tasks:
+        db.refresh(task)
+    
+    # Store task IDs before closing session
+    task_ids = [task.id for task in tasks]
+    
+    # Create bid relationship
+    bid = Bid(
+        task_id=task_ids[0],
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create 120 messages (mix of with and without task_id)
+    from database import Message
+    messages = []
+    for i in range(120):
+        # Alternate between messages with and without task_id
+        task_id = task_ids[i % 10] if i % 3 != 0 else None
+        message = Message(
+            sender_id=test_users["tasker"].id if i % 2 == 0 else test_users["customer"].id,
+            receiver_id=test_users["customer"].id if i % 2 == 0 else test_users["tasker"].id,
+            task_id=task_id,
+            content=f"Message {i}"
+        )
+        messages.append(message)
+    
+    db.add_all(messages)
+    db.commit()
+    db.close()
+    
+    # Measure query performance
+    import time
+    start_time = time.time()
+    
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    end_time = time.time()
+    response_time_ms = (end_time - start_time) * 1000
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) == 120
+    
+    # Verify response time (should be under 100ms, requirement is 50ms increase)
+    print(f"Response time: {response_time_ms:.2f}ms")
+    assert response_time_ms < 200  # Liberal threshold for test environment
+    
+    # Verify task details are correctly populated
+    messages_with_task = [m for m in messages if m["task_id"] is not None]
+    messages_without_task = [m for m in messages if m["task_id"] is None]
+    
+    assert len(messages_with_task) > 0
+    assert len(messages_without_task) > 0
+    
+    # Verify all messages with task_id have task details
+    for msg in messages_with_task:
+        assert msg["task_title"] is not None
+        assert msg["task_status"] is not None
+        assert msg["task_title"].startswith("Task ")
+    
+    # Verify all messages without task_id have null task details
+    for msg in messages_without_task:
+        assert msg["task_title"] is None
+        assert msg["task_status"] is None
+
+
+def test_get_messages_join_query_correctness(client, test_users, auth_headers):
+    """Test that JOIN query correctly matches messages to tasks."""
+    db = TestingSessionLocal()
+    
+    # Create multiple tasks with different statuses
+    task1 = Task(
+        customer_id=test_users["customer"].id,
+        title="Plumbing Work",
+        description="Fix pipes",
+        location="Location 1",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=150.0,
+        status=TaskStatus.OPEN
+    )
+    task2 = Task(
+        customer_id=test_users["customer"].id,
+        title="Electrical Work",
+        description="Wire installation",
+        location="Location 2",
+        date=datetime.utcnow() + timedelta(days=2),
+        budget=200.0,
+        status=TaskStatus.IN_PROGRESS
+    )
+    db.add_all([task1, task2])
+    db.commit()
+    db.refresh(task1)
+    db.refresh(task2)
+    task1_id = task1.id
+    task2_id = task2.id
+    
+    # Create bids for relationship
+    bid1 = Bid(task_id=task1_id, tasker_id=test_users["tasker"].id, amount=140.0)
+    bid2 = Bid(task_id=task2_id, tasker_id=test_users["tasker"].id, amount=190.0)
+    db.add_all([bid1, bid2])
+    db.commit()
+    
+    # Create messages for different tasks
+    from database import Message
+    msg1 = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task1_id,
+        content="Message about plumbing"
+    )
+    msg2 = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task2_id,
+        content="Message about electrical"
+    )
+    db.add_all([msg1, msg2])
+    db.commit()
+    db.close()
+    
+    # Get messages
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    
+    # Find each message and verify correct task details
+    plumbing_msg = next((m for m in messages if "plumbing" in m["content"]), None)
+    electrical_msg = next((m for m in messages if "electrical" in m["content"]), None)
+    
+    assert plumbing_msg is not None
+    assert plumbing_msg["task_id"] == task1_id
+    assert plumbing_msg["task_title"] == "Plumbing Work"
+    assert plumbing_msg["task_status"] == TaskStatus.OPEN.value
+    
+    assert electrical_msg is not None
+    assert electrical_msg["task_id"] == task2_id
+    assert electrical_msg["task_title"] == "Electrical Work"
+    assert electrical_msg["task_status"] == TaskStatus.IN_PROGRESS.value
+
+
+def test_get_messages_response_schema_validation(client, test_users, auth_headers):
+    """Test that response matches MessageResponseWithTask schema."""
+    db = TestingSessionLocal()
+    
+    # Create task
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Schema Test Task",
+        description="Test",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0,
+        status=TaskStatus.COMPLETED
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    task_id = task.id
+    
+    # Create bid
+    bid = Bid(
+        task_id=task_id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message
+    from database import Message
+    message = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task_id,
+        content="Testing schema"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) > 0
+    
+    msg = messages[0]
+    
+    # Verify all required fields from MessageResponse
+    assert "id" in msg and isinstance(msg["id"], int)
+    assert "sender_id" in msg and isinstance(msg["sender_id"], int)
+    assert "receiver_id" in msg and isinstance(msg["receiver_id"], int)
+    assert "content" in msg and isinstance(msg["content"], str)
+    assert "read" in msg and isinstance(msg["read"], bool)
+    assert "created_at" in msg and isinstance(msg["created_at"], str)
+    
+    # Verify task_id field (can be int or None)
+    assert "task_id" in msg
+    
+    # Verify enhanced fields from MessageResponseWithTask
+    assert "task_title" in msg
+    assert "task_status" in msg
+    
+    # If task_id is present, task details should be present
+    if msg["task_id"] is not None:
+        assert msg["task_title"] is not None
+        assert msg["task_status"] is not None
+        assert isinstance(msg["task_title"], str)
+        assert isinstance(msg["task_status"], str)
+
+
+def test_get_messages_backwards_compatibility(client, test_users, auth_headers):
+    """Test that response is backwards compatible with existing message responses."""
+    db = TestingSessionLocal()
+    
+    # Create task and relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Compatibility Test",
+        description="Test",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    task_id = task.id
+    
+    bid = Bid(
+        task_id=task_id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message
+    from database import Message
+    message = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task_id,
+        content="Backwards compatibility test"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    
+    msg = messages[0]
+    
+    # All original MessageResponse fields should still be present
+    original_fields = ["id", "sender_id", "receiver_id", "task_id", "content", "read", "created_at"]
+    for field in original_fields:
+        assert field in msg, f"Missing original field: {field}"
+    
+    # New fields should not break existing functionality
+    assert msg["sender_id"] == test_users["tasker"].id
+    assert msg["receiver_id"] == test_users["customer"].id
+    assert msg["content"] == "Backwards compatibility test"
+
+
 def test_message_without_task_id(client, test_users, auth_headers):
     """Test message creation without task_id (general message)."""
     db = TestingSessionLocal()

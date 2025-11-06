@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from datetime import timedelta, datetime
 from typing import List
 
@@ -9,7 +10,7 @@ import database
 import schemas
 import auth
 from permissions import can_message_user
-from database import Task, Bid, Offer, Agreement, User, UserRole
+from database import Task, Bid, Offer, Agreement, User, UserRole, Message
 
 app = FastAPI(title="Tasker Platform API")
 
@@ -397,15 +398,31 @@ def send_message(
     db.refresh(db_message)
     return db_message
 
-@app.get("/messages", response_model=List[schemas.MessageResponse])
+@app.get("/messages", response_model=List[schemas.MessageResponseWithTask])
 def get_messages(
     current_user: database.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
-    return db.query(database.Message).filter(
-        (database.Message.sender_id == current_user.id) | 
-        (database.Message.receiver_id == current_user.id)
-    ).order_by(database.Message.created_at.desc()).all()
+    messages = db.query(
+        Message.id,
+        Message.sender_id,
+        Message.receiver_id,
+        Message.task_id,
+        Message.content,
+        Message.read,
+        Message.created_at,
+        Task.title.label('task_title'),
+        Task.status.label('task_status')
+    ).outerjoin(
+        Task, Message.task_id == Task.id
+    ).filter(
+        or_(
+            Message.sender_id == current_user.id,
+            Message.receiver_id == current_user.id
+        )
+    ).order_by(Message.created_at.desc()).all()
+    
+    return messages
 
 @app.put("/messages/{message_id}/read")
 def mark_message_read(

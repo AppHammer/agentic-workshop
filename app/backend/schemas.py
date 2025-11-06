@@ -132,6 +132,14 @@ class MessageResponse(MessageBase):
     class Config:
         from_attributes = True
 
+class MessageResponseWithTask(MessageResponse):
+    """Enhanced message response including task context"""
+    task_title: Optional[str] = None
+    task_status: Optional[TaskStatus] = None
+    
+    class Config:
+        from_attributes = True
+
 # Review schemas
 class ReviewBase(BaseModel):
     task_id: int

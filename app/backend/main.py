@@ -452,6 +452,19 @@ def mark_message_read(
     message.read = True
     db.commit()
     return {"message": "Message marked as read"}
+@app.get("/messages/unread-count")
+def get_unread_count(
+    current_user: database.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """Get count of unread messages for current user"""
+    count = db.query(database.Message).filter(
+        database.Message.receiver_id == current_user.id,
+        database.Message.read == False
+    ).count()
+    
+    return {"unread_count": count}
+
 # Task-specific message endpoints
 @app.get("/tasks/{task_id}/messages", response_model=List[schemas.MessageResponse])
 def get_task_messages(

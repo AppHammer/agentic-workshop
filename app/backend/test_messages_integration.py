@@ -1620,3 +1620,346 @@ def test_get_messages_with_multiple_users_correct_details(client, test_users, au
             assert msg["receiver_id"] == test_users["tasker"].id
             assert msg["receiver_name"] == "Test Tasker"
             assert msg["receiver_role"] == UserRole.TASKER.value
+"""
+Integration tests for unread message count endpoint.
+
+Tests verify accurate counting, authentication, and performance.
+"""
+
+
+def test_unread_count_no_messages(client, test_users, auth_headers):
+    """Test unread count returns 0 when no messages exist."""
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["unread_count"] == 0
+
+
+def test_unread_count_with_unread_messages(client, test_users, auth_headers):
+    """Test unread count returns correct count with multiple unread messages."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create multiple unread messages to customer
+    from database import Message
+    for i in range(5):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Message {i}",
+            read=False
+        )
+        db.add(message)
+    
+    db.commit()
+    db.close()
+    
+    # Check customer's unread count
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["unread_count"] == 5
+
+
+def test_unread_count_only_receiver_messages(client, test_users, auth_headers):
+    """Test unread count only counts messages where user is receiver, not sender."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create messages where customer is sender (should NOT be counted)
+    from database import Message
+    for i in range(3):
+        message = Message(
+            sender_id=test_users["customer"].id,
+            receiver_id=test_users["tasker"].id,
+            task_id=task.id,
+            content=f"Sent message {i}",
+            read=False
+        )
+        db.add(message)
+    
+    # Create messages where customer is receiver (should be counted)
+    for i in range(2):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Received message {i}",
+            read=False
+        )
+        db.add(message)
+    
+    db.commit()
+    db.close()
+    
+    # Customer should only see count of 2 (messages they received)
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["unread_count"] == 2
+
+
+def test_unread_count_updates_after_marking_read(client, test_users, auth_headers):
+    """Test unread count decreases after marking messages as read."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create unread messages
+    from database import Message
+    message_ids = []
+    for i in range(3):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Message {i}",
+            read=False
+        )
+        db.add(message)
+        db.commit()
+        db.refresh(message)
+        message_ids.append(message.id)
+    
+    db.close()
+    
+    # Verify initial count
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    assert response.status_code == 200
+    assert response.json()["unread_count"] == 3
+    
+    # Mark one message as read
+    response = client.put(
+        f"/messages/{message_ids[0]}/read",
+        headers=auth_headers["customer"]
+    )
+    assert response.status_code == 200
+    
+    # Verify count decreased
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    assert response.status_code == 200
+    assert response.json()["unread_count"] == 2
+    
+    # Mark another message as read
+    response = client.put(
+        f"/messages/{message_ids[1]}/read",
+        headers=auth_headers["customer"]
+    )
+    assert response.status_code == 200
+    
+    # Verify count decreased again
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    assert response.status_code == 200
+    assert response.json()["unread_count"] == 1
+
+
+def test_unread_count_unauthorized(client):
+    """Test that unauthorized access returns 401."""
+    response = client.get("/messages/unread-count")
+    
+    assert response.status_code == 401
+
+
+def test_unread_count_performance_large_dataset(client, test_users, auth_headers):
+    """Test unread count performance with 1000+ messages in database."""
+    import time
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Performance Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create 1000+ messages (mix of read and unread)
+    from database import Message
+    messages = []
+    for i in range(1200):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Performance test message {i}",
+            read=(i % 3 == 0)  # Every third message is read
+        )
+        messages.append(message)
+    
+    db.bulk_save_objects(messages)
+    db.commit()
+    db.close()
+    
+    # Measure response time
+    start_time = time.time()
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    end_time = time.time()
+    response_time_ms = (end_time - start_time) * 1000
+    
+    # Verify response
+    assert response.status_code == 200
+    data = response.json()
+    # 1200 messages, every third is read (400 read), so 800 unread
+    assert data["unread_count"] == 800
+    
+    # Verify performance (should be <50ms as per acceptance criteria)
+    assert response_time_ms < 50, f"Response time {response_time_ms}ms exceeds 50ms threshold"
+
+
+def test_unread_count_mixed_read_unread(client, test_users, auth_headers):
+    """Test unread count with mix of read and unread messages."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create mix of read and unread messages
+    from database import Message
+    for i in range(4):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Unread message {i}",
+            read=False
+        )
+        db.add(message)
+    
+    for i in range(6):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Read message {i}",
+            read=True
+        )
+        db.add(message)
+    
+    db.commit()
+    db.close()
+    
+    # Should only count unread (4)
+    response = client.get(
+        "/messages/unread-count",
+        headers=auth_headers["customer"]
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["unread_count"] == 4
+

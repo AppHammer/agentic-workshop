@@ -128,10 +128,10 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     sender_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    receiver_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    receiver_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     task_id = Column(Integer, ForeignKey("tasks.id"))
     content = Column(Text, nullable=False)
-    read = Column(Boolean, default=False)
+    read = Column(Boolean, default=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

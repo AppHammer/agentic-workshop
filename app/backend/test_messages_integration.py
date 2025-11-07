@@ -1183,3 +1183,440 @@ def test_message_task_permission_tasker_with_agreement(client, test_users, auth_
     assert response.status_code == 200
     data = response.json()
     assert data["task_id"] == task.id
+
+
+def test_get_messages_includes_sender_user_details(client, test_users, auth_headers):
+    """Test GET /messages includes sender user details (name and role)."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message from tasker to customer
+    from database import Message
+    message = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task.id,
+        content="Hello from tasker"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages as customer
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) > 0
+    
+    msg = messages[0]
+    
+    # Verify sender details are included
+    assert "sender_name" in msg
+    assert msg["sender_name"] == "Test Tasker"
+    assert "sender_role" in msg
+    assert msg["sender_role"] == UserRole.TASKER.value
+    
+
+def test_get_messages_includes_receiver_user_details(client, test_users, auth_headers):
+    """Test GET /messages includes receiver user details (name and role)."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message from customer to tasker
+    from database import Message
+    message = Message(
+        sender_id=test_users["customer"].id,
+        receiver_id=test_users["tasker"].id,
+        task_id=task.id,
+        content="Hello from customer"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages as customer
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) > 0
+    
+    msg = messages[0]
+    
+    # Verify receiver details are included
+    assert "receiver_name" in msg
+    assert msg["receiver_name"] == "Test Tasker"
+    assert "receiver_role" in msg
+    assert msg["receiver_role"] == UserRole.TASKER.value
+
+
+def test_get_messages_user_details_both_directions(client, test_users, auth_headers):
+    """Test user details are correct for messages in both directions."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create messages in both directions
+    from database import Message
+    msg1 = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task.id,
+        content="Message from tasker"
+    )
+    msg2 = Message(
+        sender_id=test_users["customer"].id,
+        receiver_id=test_users["tasker"].id,
+        task_id=task.id,
+        content="Message from customer"
+    )
+    db.add_all([msg1, msg2])
+    db.commit()
+    db.close()
+    
+    # Get messages as customer
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) == 2
+    
+    # Find each message type
+    tasker_msg = next((m for m in messages if "tasker" in m["content"]), None)
+    customer_msg = next((m for m in messages if "customer" in m["content"]), None)
+    
+    # Verify tasker->customer message
+    assert tasker_msg is not None
+    assert tasker_msg["sender_name"] == "Test Tasker"
+    assert tasker_msg["sender_role"] == UserRole.TASKER.value
+    assert tasker_msg["receiver_name"] == "Test Customer"
+    assert tasker_msg["receiver_role"] == UserRole.CUSTOMER.value
+    
+    # Verify customer->tasker message
+    assert customer_msg is not None
+    assert customer_msg["sender_name"] == "Test Customer"
+    assert customer_msg["sender_role"] == UserRole.CUSTOMER.value
+    assert customer_msg["receiver_name"] == "Test Tasker"
+    assert customer_msg["receiver_role"] == UserRole.TASKER.value
+
+
+def test_get_messages_join_performance_with_user_details(client, test_users, auth_headers, benchmark):
+    """Test query performance with user JOINs meets <200ms requirement for 50+ messages."""
+    db = TestingSessionLocal()
+    
+    # Create task
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Performance Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    # Create bid relationship
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create 50 messages
+    from database import Message
+    messages = []
+    for i in range(50):
+        message = Message(
+            sender_id=test_users["tasker"].id if i % 2 == 0 else test_users["customer"].id,
+            receiver_id=test_users["customer"].id if i % 2 == 0 else test_users["tasker"].id,
+            task_id=task.id,
+            content=f"Performance test message {i}"
+        )
+        messages.append(message)
+    
+    db.add_all(messages)
+    db.commit()
+    db.close()
+    
+    # Measure query performance using pytest-benchmark
+    def get_messages_request():
+        return client.get("/messages", headers=auth_headers["customer"])
+    
+    result = benchmark(get_messages_request)
+    
+    assert result.status_code == 200
+    messages = result.json()
+    assert len(messages) == 50
+    
+    # Verify all messages have user details
+    for msg in messages:
+        assert msg["sender_name"] is not None
+        assert msg["sender_role"] is not None
+        assert msg["receiver_name"] is not None
+        assert msg["receiver_role"] is not None
+
+
+def test_get_messages_single_query_no_n_plus_one(client, test_users, auth_headers):
+    """Test that user details are fetched with JOINs, not separate queries (no N+1 problem)."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create 10 messages
+    from database import Message
+    for i in range(10):
+        message = Message(
+            sender_id=test_users["tasker"].id,
+            receiver_id=test_users["customer"].id,
+            task_id=task.id,
+            content=f"Test message {i}"
+        )
+        db.add(message)
+    
+    db.commit()
+    db.close()
+    
+    # Get messages - should execute single query with JOINs
+    import time
+    start_time = time.time()
+    
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    end_time = time.time()
+    response_time_ms = (end_time - start_time) * 1000
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) == 10
+    
+    # With efficient JOINs, even 10 messages should be fast (<50ms)
+    # If there were N+1 queries, it would be significantly slower
+    print(f"Query time for 10 messages: {response_time_ms:.2f}ms")
+    assert response_time_ms < 100  # Should be much faster with JOINs
+    
+    # Verify all messages have user details populated
+    for msg in messages:
+        assert msg["sender_name"] == "Test Tasker"
+        assert msg["sender_role"] == UserRole.TASKER.value
+        assert msg["receiver_name"] == "Test Customer"
+        assert msg["receiver_role"] == UserRole.CUSTOMER.value
+
+
+def test_get_messages_user_details_schema_validation(client, test_users, auth_headers):
+    """Test that response includes all new user detail fields in schema."""
+    db = TestingSessionLocal()
+    
+    # Create task and bid relationship
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Schema Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create message
+    from database import Message
+    message = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task.id,
+        content="Schema validation test"
+    )
+    db.add(message)
+    db.commit()
+    db.close()
+    
+    # Get messages
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) > 0
+    
+    msg = messages[0]
+    
+    # Verify all new user detail fields are present
+    assert "sender_name" in msg
+    assert "sender_role" in msg
+    assert "receiver_name" in msg
+    assert "receiver_role" in msg
+    
+    # Verify types
+    assert isinstance(msg["sender_name"], str)
+    assert isinstance(msg["sender_role"], str)
+    assert isinstance(msg["receiver_name"], str)
+    assert isinstance(msg["receiver_role"], str)
+    
+    # Verify values match expected user data
+    assert msg["sender_name"] == "Test Tasker"
+    assert msg["sender_role"] in [UserRole.CUSTOMER.value, UserRole.TASKER.value]
+    assert msg["receiver_name"] == "Test Customer"
+    assert msg["receiver_role"] in [UserRole.CUSTOMER.value, UserRole.TASKER.value]
+
+
+def test_get_messages_with_multiple_users_correct_details(client, test_users, auth_headers):
+    """Test that user details are correctly associated when multiple users are involved."""
+    db = TestingSessionLocal()
+    
+    # Create task
+    task = Task(
+        customer_id=test_users["customer"].id,
+        title="Test Task",
+        description="Test Description",
+        location="Test Location",
+        date=datetime.utcnow() + timedelta(days=1),
+        budget=100.0
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+    
+    # Create bid from tasker
+    bid = Bid(
+        task_id=task.id,
+        tasker_id=test_users["tasker"].id,
+        amount=90.0
+    )
+    db.add(bid)
+    db.commit()
+    
+    # Create messages between different user pairs
+    from database import Message
+    msg1 = Message(
+        sender_id=test_users["tasker"].id,
+        receiver_id=test_users["customer"].id,
+        task_id=task.id,
+        content="From tasker to customer"
+    )
+    msg2 = Message(
+        sender_id=test_users["customer"].id,
+        receiver_id=test_users["tasker"].id,
+        task_id=task.id,
+        content="From customer to tasker"
+    )
+    
+    db.add_all([msg1, msg2])
+    db.commit()
+    db.close()
+    
+    # Get messages as customer
+    response = client.get("/messages", headers=auth_headers["customer"])
+    
+    assert response.status_code == 200
+    messages = response.json()
+    assert len(messages) == 2
+    
+    # Verify each message has correct user details
+    for msg in messages:
+        if "tasker to customer" in msg["content"]:
+            # Message sent by tasker
+            assert msg["sender_id"] == test_users["tasker"].id
+            assert msg["sender_name"] == "Test Tasker"
+            assert msg["sender_role"] == UserRole.TASKER.value
+            assert msg["receiver_id"] == test_users["customer"].id
+            assert msg["receiver_name"] == "Test Customer"
+            assert msg["receiver_role"] == UserRole.CUSTOMER.value
+        else:
+            # Message sent by customer
+            assert msg["sender_id"] == test_users["customer"].id
+            assert msg["sender_name"] == "Test Customer"
+            assert msg["sender_role"] == UserRole.CUSTOMER.value
+            assert msg["receiver_id"] == test_users["tasker"].id
+            assert msg["receiver_name"] == "Test Tasker"
+            assert msg["receiver_role"] == UserRole.TASKER.value

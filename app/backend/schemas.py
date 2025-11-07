@@ -136,6 +136,10 @@ class MessageResponseWithTask(MessageResponse):
     """Enhanced message response including task context"""
     task_title: Optional[str] = None
     task_status: Optional[TaskStatus] = None
+    sender_name: Optional[str] = None
+    sender_role: Optional[UserRole] = None
+    receiver_name: Optional[str] = None
+    receiver_role: Optional[UserRole] = None
     
     class Config:
         from_attributes = True

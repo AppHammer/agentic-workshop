@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from sqlalchemy import or_
 from datetime import timedelta, datetime
 from typing import List
@@ -403,6 +403,10 @@ def get_messages(
     current_user: database.User = Depends(auth.get_current_user),
     db: Session = Depends(database.get_db)
 ):
+    # Create aliases for sender and receiver users
+    Sender = aliased(User)
+    Receiver = aliased(User)
+    
     messages = db.query(
         Message.id,
         Message.sender_id,
@@ -412,9 +416,17 @@ def get_messages(
         Message.read,
         Message.created_at,
         Task.title.label('task_title'),
-        Task.status.label('task_status')
+        Task.status.label('task_status'),
+        Sender.full_name.label('sender_name'),
+        Sender.role.label('sender_role'),
+        Receiver.full_name.label('receiver_name'),
+        Receiver.role.label('receiver_role')
     ).outerjoin(
         Task, Message.task_id == Task.id
+    ).join(
+        Sender, Message.sender_id == Sender.id
+    ).join(
+        Receiver, Message.receiver_id == Receiver.id
     ).filter(
         or_(
             Message.sender_id == current_user.id,

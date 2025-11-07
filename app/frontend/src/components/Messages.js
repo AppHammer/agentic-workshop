@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { getMessages, sendMessage, markMessageRead, getUserTasks } from '../api';
 
@@ -11,11 +11,56 @@ function Messages({ user }) {
   const [error, setError] = useState('');
   const [selectedTaskFilter, setSelectedTaskFilter] = useState(null);
   const [userTasks, setUserTasks] = useState([]);
+  const [lastMessageId, setLastMessageId] = useState(null);
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
   
+  const messageThreadRef = useRef(null);
+  const pollingIntervalRef = useRef(null);
+  
+  // Initial load
   useEffect(() => {
     loadMessages();
     loadUserTasks();
+    
+    // Set up polling for new messages
+    setupPolling();
+    
+    // Cleanup on unmount
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
   }, []);
+  
+  // Track scroll position to determine auto-scroll behavior
+  useEffect(() => {
+    const messageThread = messageThreadRef.current;
+    if (messageThread) {
+      const handleScroll = () => {
+        const threshold = 50; // pixels from bottom
+        const atBottom = messageThread.scrollHeight - messageThread.scrollTop
+          <= messageThread.clientHeight + threshold;
+        setIsAtBottom(atBottom);
+      };
+      
+      messageThread.addEventListener('scroll', handleScroll);
+      return () => messageThread.removeEventListener('scroll', handleScroll);
+    }
+  }, [selectedConversation]);
+  
+  // Setup polling with Page Visibility API
+  const setupPolling = () => {
+    // Poll every 5 seconds
+    pollingIntervalRef.current = setInterval(() => {
+      // Only poll if tab is visible
+      if (document.visibilityState === 'visible') {
+        loadMessages(true); // Pass true for incremental/polling load
+      }
+    }, 5000);
+  };
   
   useEffect(() => {
     // Apply filter whenever conversations or filter changes
@@ -52,15 +97,59 @@ function Messages({ user }) {
     }
   }, [location.state, conversations]);
   
-  const loadMessages = async () => {
+  const loadMessages = async (incremental = false) => {
     try {
       const response = await getMessages();
-      // Group messages by conversation partner
-      const grouped = groupMessagesByPartner(response.data, user.id);
-      setConversations(grouped);
+      const messages = response.data;
+      
+      if (messages.length > 0) {
+        const newLastMessageId = messages[0].id;
+        
+        // Only update if we have new messages (or if not incremental)
+        if (!incremental || newLastMessageId !== lastMessageId) {
+          const grouped = groupMessagesByPartner(messages, user.id);
+          setConversations(grouped);
+          setLastMessageId(newLastMessageId);
+          
+          // Reset retry count on success
+          if (retryCount > 0) {
+            setRetryCount(0);
+          }
+          
+          // Auto-scroll if user was at bottom
+          if (isAtBottom && messageThreadRef.current) {
+            setTimeout(() => {
+              if (messageThreadRef.current) {
+                messageThreadRef.current.scrollTop = messageThreadRef.current.scrollHeight;
+              }
+            }, 100);
+          }
+        }
+      }
     } catch (err) {
-      setError('Failed to load messages');
       console.error('Error loading messages:', err);
+      
+      // Implement exponential backoff for repeated failures
+      if (incremental) {
+        const newRetryCount = retryCount + 1;
+        setRetryCount(newRetryCount);
+        
+        // Don't show error on first few retries during polling
+        if (newRetryCount > 3) {
+          setError('Having trouble loading new messages. Will keep trying...');
+        }
+        
+        // If too many failures, clear interval and show persistent error
+        if (newRetryCount > 10) {
+          if (pollingIntervalRef.current) {
+            clearInterval(pollingIntervalRef.current);
+            pollingIntervalRef.current = null;
+          }
+          setError('Connection lost. Please refresh the page.');
+        }
+      } else {
+        setError('Failed to load messages');
+      }
     }
   };
   
@@ -156,6 +245,16 @@ function Messages({ user }) {
     
     // Reload messages to update read status
     await loadMessages();
+    
+    // Scroll to bottom of new conversation
+    if (messageThreadRef.current) {
+      setTimeout(() => {
+        if (messageThreadRef.current) {
+          messageThreadRef.current.scrollTop = messageThreadRef.current.scrollHeight;
+          setIsAtBottom(true);
+        }
+      }, 100);
+    }
   };
   
   const handleSendMessage = async (e) => {
@@ -264,7 +363,7 @@ function Messages({ user }) {
               </span>
             </div>
             
-            <div className="message-thread">
+            <div className="message-thread" ref={messageThreadRef}>
               {selectedConversation.messages
                 .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
                 .map(msg => (

@@ -202,6 +202,17 @@ function TaskDetail({ user }) {
     }
   };
 
+  const handleMessageTasker = (taskerId, taskerName, taskId) => {
+    // Navigate to messaging with pre-selected conversation
+    navigate('/messages', {
+      state: {
+        preselectedUserId: taskerId,
+        preselectedUserName: taskerName,
+        taskId: taskId
+      }
+    });
+  };
+
   if (!task) {
     return <div className="container">Loading...</div>;
   }
@@ -273,15 +284,27 @@ function TaskDetail({ user }) {
                 <p><strong>Amount:</strong> ${bid.amount}</p>
                 <p><strong>Message:</strong> {bid.message}</p>
                 <p><strong>Tasker ID:</strong> {bid.tasker_id}</p>
-                {!agreement && task.status === 'open' && (
-                  <button 
-                    onClick={() => handleAcceptBid(bid.id)} 
-                    className="btn-success"
-                    style={{ marginTop: '10px' }}
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  {!agreement && task.status === 'open' && (
+                    <button
+                      onClick={() => handleAcceptBid(bid.id)}
+                      className="btn-success"
+                    >
+                      Accept This Bid
+                    </button>
+                  )}
+                  <button
+                    className="btn-primary message-tasker-btn"
+                    onClick={() => handleMessageTasker(
+                      bid.tasker_id,
+                      `Tasker ${bid.tasker_id}`,
+                      task.id
+                    )}
+                    aria-label={`Message Tasker ${bid.tasker_id}`}
                   >
-                    Accept This Bid
+                    Message Tasker
                   </button>
-                )}
+                </div>
               </div>
             ))}
           </div>
@@ -339,15 +362,29 @@ function TaskDetail({ user }) {
           <div className="offer-item">
             <p><strong>Amount:</strong> ${myOffer.amount}</p>
             <p><strong>Message:</strong> {myOffer.message}</p>
-            {!myOffer.accepted && task.status === 'open' && (
-              <button 
-                onClick={() => handleAcceptOffer(myOffer.id)} 
-                className="btn-success"
-                style={{ marginTop: '10px' }}
-              >
-                Accept This Offer
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+              {!myOffer.accepted && task.status === 'open' && (
+                <button
+                  onClick={() => handleAcceptOffer(myOffer.id)}
+                  className="btn-success"
+                >
+                  Accept This Offer
+                </button>
+              )}
+              {user.role === 'tasker' && (
+                <button
+                  className="btn-primary message-tasker-btn"
+                  onClick={() => handleMessageTasker(
+                    task.customer_id,
+                    customer?.full_name || `Customer ${task.customer_id}`,
+                    task.id
+                  )}
+                  aria-label={`Message ${customer?.full_name || 'Customer'}`}
+                >
+                  Message Customer
+                </button>
+              )}
+            </div>
             {myOffer.accepted && <p className="success">✓ Offer Accepted!</p>}
           </div>
         </div>

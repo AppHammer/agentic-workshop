@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { getMessages, sendMessage, markMessageRead } from '../api';
 
 function Messages({ user }) {
+  const location = useLocation();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messageContent, setMessageContent] = useState('');
@@ -10,6 +12,29 @@ function Messages({ user }) {
   useEffect(() => {
     loadMessages();
   }, []);
+  
+  useEffect(() => {
+    // Handle pre-selected conversation from navigation
+    if (location.state?.preselectedUserId && conversations.length > 0) {
+      const preselectedConv = conversations.find(
+        conv => conv.partnerId === location.state.preselectedUserId
+      );
+      if (preselectedConv) {
+        handleSelectConversation(preselectedConv);
+      } else {
+        // Create a new conversation stub for the preselected user
+        const newConversation = {
+          partnerId: location.state.preselectedUserId,
+          partnerName: location.state.preselectedUserName || `User ${location.state.preselectedUserId}`,
+          partnerRole: user.role === 'customer' ? 'tasker' : 'customer',
+          messages: [],
+          lastMessage: null,
+          unreadCount: 0
+        };
+        setSelectedConversation(newConversation);
+      }
+    }
+  }, [location.state, conversations]);
   
   const loadMessages = async () => {
     try {
@@ -117,7 +142,7 @@ function Messages({ user }) {
       await sendMessage({
         receiver_id: selectedConversation.partnerId,
         content: messageContent,
-        task_id: selectedConversation.lastMessage.task_id
+        task_id: location.state?.taskId || selectedConversation.lastMessage?.task_id
       });
       
       setMessageContent('');

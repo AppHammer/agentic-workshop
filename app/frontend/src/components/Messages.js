@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getMessages, sendMessage, markMessageRead } from '../api';
+import { getMessages, sendMessage, markMessageRead, getUserTasks } from '../api';
 
 function Messages({ user }) {
   const location = useLocation();
   const [conversations, setConversations] = useState([]);
+  const [filteredConversations, setFilteredConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messageContent, setMessageContent] = useState('');
   const [error, setError] = useState('');
+  const [selectedTaskFilter, setSelectedTaskFilter] = useState(null);
+  const [userTasks, setUserTasks] = useState([]);
   
   useEffect(() => {
     loadMessages();
+    loadUserTasks();
   }, []);
+  
+  useEffect(() => {
+    // Apply filter whenever conversations or filter changes
+    if (selectedTaskFilter === null) {
+      setFilteredConversations(conversations);
+    } else {
+      const filtered = conversations.filter(conv =>
+        conv.messages.some(msg => msg.task_id === selectedTaskFilter)
+      );
+      setFilteredConversations(filtered);
+    }
+  }, [conversations, selectedTaskFilter]);
   
   useEffect(() => {
     // Handle pre-selected conversation from navigation
@@ -45,6 +61,15 @@ function Messages({ user }) {
     } catch (err) {
       setError('Failed to load messages');
       console.error('Error loading messages:', err);
+    }
+  };
+  
+  const loadUserTasks = async () => {
+    try {
+      const response = await getUserTasks();
+      setUserTasks(response.data);
+    } catch (err) {
+      console.error('Error loading tasks:', err);
     }
   };
   
@@ -153,16 +178,44 @@ function Messages({ user }) {
     }
   };
   
+  const handleTaskFilterChange = (e) => {
+    const taskId = e.target.value ? parseInt(e.target.value) : null;
+    setSelectedTaskFilter(taskId);
+  };
+  
   return (
     <div className="messages-container">
       <div className="conversations-panel">
-        <h2>Messages</h2>
+        <div className="messages-header">
+          <h2>Messages</h2>
+          <div className="task-filter">
+            <label htmlFor="task-filter">Filter by Task:</label>
+            <select
+              id="task-filter"
+              value={selectedTaskFilter || ''}
+              onChange={handleTaskFilterChange}
+              className="task-filter-dropdown"
+              aria-label="Filter messages by task"
+            >
+              <option value="">All Tasks</option>
+              {userTasks.map(task => (
+                <option key={task.id} value={task.id}>
+                  {task.title} ({task.status})
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         {error && <div className="error">{error}</div>}
-        {conversations.length === 0 ? (
-          <p className="empty-state">No messages yet</p>
+        {filteredConversations.length === 0 ? (
+          <p className="empty-state">
+            {selectedTaskFilter
+              ? 'No conversations found for this task'
+              : 'No messages yet'}
+          </p>
         ) : (
           <div className="conversation-list">
-            {conversations.map(conv => (
+            {filteredConversations.map(conv => (
               <div
                 key={conv.partnerId}
                 className={`conversation-item ${

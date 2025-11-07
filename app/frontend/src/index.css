@@ -275,6 +275,53 @@ label {
   overflow: hidden;
 }
 
+.messages-header {
+  margin-bottom: 20px;
+}
+
+.messages-header h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 24px;
+}
+
+.task-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.task-filter label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  margin: 0;
+}
+
+.task-filter-dropdown {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.task-filter-dropdown:hover {
+  border-color: #007bff;
+}
+
+.task-filter-dropdown:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
 .conversations-panel h2 {
   margin-top: 0;
   margin-bottom: 20px;

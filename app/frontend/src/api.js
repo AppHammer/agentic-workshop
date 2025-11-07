@@ -43,6 +43,8 @@ export const updateTask = (taskId, taskData) => api.put(`/tasks/${taskId}`, task
 
 export const getMyTasks = () => api.get('/tasks/user/my-tasks');
 
+export const getUserTasks = () => api.get('/tasks/my-tasks');
+
 // Bids
 export const createBid = (bidData) => api.post('/bids', bidData);
 

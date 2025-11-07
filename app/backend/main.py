@@ -154,6 +154,44 @@ def get_my_tasks(
         # For taskers, return tasks they've bid on or have agreements for
         return db.query(database.Task).join(database.Bid).filter(database.Bid.tasker_id == current_user.id).all()
 
+@app.get("/tasks/my-tasks", response_model=List[schemas.TaskResponse])
+def get_user_involved_tasks(
+    current_user: database.User = Depends(auth.get_current_user),
+    db: Session = Depends(database.get_db)
+):
+    """Get all tasks where user is involved (creator, bidder, or has agreement)"""
+    if current_user.role == database.UserRole.CUSTOMER:
+        # Get tasks created by customer
+        tasks = db.query(database.Task).filter(
+            database.Task.customer_id == current_user.id
+        ).all()
+    else:  # Tasker
+        # Get tasks where tasker has bid, offer, or agreement
+        task_ids = set()
+        
+        # Tasks with bids
+        bid_tasks = db.query(database.Task.id).join(database.Bid).filter(
+            database.Bid.tasker_id == current_user.id
+        ).all()
+        task_ids.update([t.id for t in bid_tasks])
+        
+        # Tasks with offers
+        offer_tasks = db.query(database.Task.id).join(database.Offer).filter(
+            database.Offer.tasker_id == current_user.id
+        ).all()
+        task_ids.update([t.id for t in offer_tasks])
+        
+        # Tasks with agreements
+        agreement_tasks = db.query(database.Task.id).join(database.Agreement).filter(
+            database.Agreement.tasker_id == current_user.id
+        ).all()
+        task_ids.update([t.id for t in agreement_tasks])
+        
+        # Get all tasks by IDs
+        tasks = db.query(database.Task).filter(database.Task.id.in_(task_ids)).all() if task_ids else []
+    
+    return tasks
+
 # Bid endpoints
 @app.post("/bids", response_model=schemas.BidResponse)
 def create_bid(

@@ -27,6 +27,15 @@ This command orchestrates a comprehensive workflow to implement, test, and valid
    - Implement the Task: Write the necessary code to implement the specified task. This might involve modifying existing files or creating new ones (e.g., new views, forms, tests).
    - Integration: Ensure your changes seamlessly integrate with the existing application. This includes: * Properly connecting new views through URLs. * Modifying templates to display new data or functionality. * Ensuring forms correctly handle new or modified data.
 
+4. **Summary**:
+   - Create an implementation summary document including:
+     - Overview of changes made
+     - Files created/modified
+     - Deployment notes
+     - Rollback plan
+     - Future enhancement suggestions
+   - add the summary to `docs/<version>/<issue-number>-summary.md`
+
 
 ### Phase 2: Test Plan Creation
 
@@ -38,6 +47,7 @@ This command orchestrates a comprehensive workflow to implement, test, and valid
      - Negative test cases for error handling
      - Edge case scenarios
      - Clear test steps and expected results
+   
 
 
 ## Success Criteria

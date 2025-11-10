@@ -27,13 +27,24 @@ First let's generate some project documentation to set the context for the AI.
 
 ## 2.1 Implement a "Profile" Feature
 
+Good cooding prompts:
+
+- Provide context about the project. Models have no context.
+- Clear with details instructions about what you want done.
+- Specific to the task, scoping it appropriately.
+- Outline what should and should not be included in the implementation.
+
 ### With tech stack
 
-You might vibe code a prompt like this:
+You might vibe code with a prompt like this:
 
-- Review the @project_structure.md and @project_tech_stack.md to understand the conventions and technologies to be used in this project. 
-  Write a feature to allow users to view their profile when logged in. Make their user name clickable and display user information from the User class in @backend/database.py.
- 
+- Review the @project_structure.md and @project_tech_stack.md to understand the conventions and technologies to be used in this project.
+  Write a feature to allow users to view their profile when logged in. Make their user name clickable and display user information from the User class in @backend/database.py
+
+  This feature only needs to support the current logged in user viewing their own  profile, not editing it.  
+  Also the user does not need to view other users profiles.
+
+
 **Questions**
 
 - Did it work?

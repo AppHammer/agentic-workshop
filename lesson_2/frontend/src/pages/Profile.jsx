@@ -27,11 +27,32 @@ export default function Profile() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return 'Not specified';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(amount);
+  };
+
+  const renderSkills = (skills) => {
+    if (!skills || skills.trim() === '') return 'Not specified';
+    
+    // Handle comma-separated skills with better formatting
+    const skillList = skills.split(',').map(s => s.trim()).filter(Boolean);
+    
+    if (skillList.length === 0) return 'Not specified';
+    
+    return skillList.join(', ');
   };
 
   if (loading) {
@@ -99,17 +120,14 @@ export default function Profile() {
             <div className="profile-field">
               <label className="profile-label">Skills:</label>
               <span className="profile-value">
-                {profile.skills || 'Not specified'}
+                {renderSkills(profile.skills)}
               </span>
             </div>
 
             <div className="profile-field">
               <label className="profile-label">Hourly Rate:</label>
               <span className="profile-value">
-                {profile.hourly_rate 
-                  ? `$${parseFloat(profile.hourly_rate).toFixed(2)}`
-                  : 'Not specified'
-                }
+                {formatCurrency(profile.hourly_rate)}
               </span>
             </div>
           </div>

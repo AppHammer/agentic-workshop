@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getCurrentUser } from '../api';
 
 function Profile() {
@@ -67,8 +68,17 @@ function Profile() {
     );
   }
 
+  // Determine dashboard path based on user role
+  const dashboardPath = user.role === 'customer'
+    ? '/customer-dashboard'
+    : '/tasker-dashboard';
+
   return (
     <div className="profile-container" role="main" aria-label="User Profile">
+      <Link to={dashboardPath} className="back-to-dashboard-btn">
+        ← Back to Dashboard
+      </Link>
+      
       <h2>My Profile</h2>
       
       <section className="profile-section" aria-labelledby="account-info-heading">

@@ -566,6 +566,40 @@ label {
   border-bottom: 2px solid #007bff;
   padding-bottom: 10px;
 }
+/* Back to Dashboard Button */
+.back-to-dashboard-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.back-to-dashboard-btn:hover {
+  background-color: #0056b3;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+}
+
+.back-to-dashboard-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.back-to-dashboard-btn:focus {
+  outline: 2px solid #0056b3;
+  outline-offset: 2px;
+}
+
 
 .profile-section {
   background: #f9f9f9;
@@ -638,7 +672,14 @@ label {
 }
 
 /* Responsive design for mobile */
+/* Mobile optimization */
 @media (max-width: 768px) {
+  .back-to-dashboard-btn {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
   .profile-container {
     margin: 20px auto;
     padding: 10px;

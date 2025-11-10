@@ -1,0 +1,65 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: FastAPI Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload",
+                "--host",
+                "0.0.0.0",
+                "--port",
+                "8000"
+            ],
+            "cwd": "${workspaceFolder}/app/backend",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/app/backend"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "React: Frontend Dev Server",
+            "type": "node",
+            "request": "launch",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "start"
+            ],
+            "cwd": "${workspaceFolder}/app/frontend",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Python: Run Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "test_auth.py",
+                "-v"
+            ],
+            "cwd": "${workspaceFolder}/app/backend",
+            "console": "integratedTerminal",
+            "justMyCode": false
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Full Stack: Backend + Frontend",
+            "configurations": [
+                "Python: FastAPI Backend",
+                "React: Frontend Dev Server"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "fullstack",
+                "order": 1
+            },
+            "stopAll": true
+        }
+    ]
+}

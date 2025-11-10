@@ -1,0 +1,755 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Message Tasker Button Styles */
+.message-tasker-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.message-tasker-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+}
+
+.message-tasker-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.message-tasker-btn:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.message-tasker-btn:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.nav {
+  background-color: #333;
+  padding: 15px 0;
+  margin-bottom: 20px;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav h1 {
+  color: white;
+  margin: 0;
+}
+
+.nav-links {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.nav-links a:hover {
+  background-color: #555;
+}
+/* Username link hover effect in navbar */
+.nav a[href="/profile"] {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.nav a[href="/profile"]:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.nav a[href="/profile"]:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.task-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.task-card h3 {
+  margin-top: 0;
+  color: #333;
+}
+
+.task-card .budget {
+  font-size: 24px;
+  font-weight: bold;
+  color: #28a745;
+  margin: 10px 0;
+}
+
+.task-card .location {
+  color: #666;
+  margin: 5px 0;
+}
+
+.task-card .date {
+  color: #666;
+  margin: 5px 0;
+}
+
+.message-list {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.message {
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+}
+
+.message.sent {
+  background-color: #d1e7fd;
+  margin-left: 20px;
+}
+
+.message.received {
+  background-color: #f8f9fa;
+  margin-right: 20px;
+}
+
+.error {
+  color: #dc3545;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+.success {
+  color: #155724;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.bid-list, .offer-list {
+  margin-top: 20px;
+}
+
+.bid-item, .offer-item {
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+  border-radius: 4px;
+}
+
+.rating {
+  color: #ffc107;
+  font-size: 20px;
+}
+
+.review-card {
+  background: white;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+}
+
+/* Messages Component Styles */
+.messages-container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  height: calc(100vh - 100px);
+}
+
+.conversations-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.messages-header {
+  margin-bottom: 20px;
+}
+
+.messages-header h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 24px;
+}
+
+.task-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.task-filter label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  margin: 0;
+}
+
+.task-filter-dropdown {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0;
+}
+
+.task-filter-dropdown:hover {
+  border-color: #007bff;
+}
+
+.task-filter-dropdown:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.conversations-panel h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 24px;
+}
+
+.conversation-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.conversation-item {
+  padding: 15px;
+  margin: 8px 0;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.conversation-item:hover {
+  background-color: #e9ecef;
+  transform: translateX(2px);
+}
+
+.conversation-item.active {
+  background-color: #e3f2fd;
+  border-left-color: #007bff;
+}
+
+.conversation-item:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.conversation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.partner-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 16px;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.role-badge.customer {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.role-badge.tasker {
+  background-color: #cce5ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
+.unread-badge {
+  background-color: #dc3545;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-left: auto;
+}
+
+.last-message {
+  color: #666;
+  font-size: 14px;
+  margin: 8px 0;
+  line-height: 1.4;
+}
+
+.conversation-item .timestamp {
+  color: #999;
+  font-size: 12px;
+  display: block;
+  margin-top: 4px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #999;
+  padding: 40px 20px;
+  font-size: 16px;
+}
+
+.message-thread-panel {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.thread-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.thread-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.message-thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 0;
+  margin-bottom: 20px;
+}
+
+.message {
+  max-width: 70%;
+  margin: 10px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  word-wrap: break-word;
+}
+
+.message.sent {
+  background-color: #007bff;
+  color: white;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+}
+
+.message.received {
+  background-color: #f1f3f5;
+  color: #333;
+  margin-right: auto;
+  border-bottom-left-radius: 4px;
+}
+
+.message p {
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.message .timestamp {
+  font-size: 11px;
+  opacity: 0.8;
+  display: block;
+}
+
+.message.sent .timestamp {
+  text-align: right;
+}
+
+.message-form {
+  display: flex;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 2px solid #e9ecef;
+}
+
+.message-form input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 24px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.message-form input:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.message-form button {
+  padding: 12px 24px;
+  border-radius: 24px;
+  white-space: nowrap;
+}
+
+.no-conversation-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 18px;
+}
+
+.no-conversation-selected p {
+  text-align: center;
+}
+
+/* Profile Page Styles - Enhanced for Read-Only Display */
+.profile-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.profile-container h2 {
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 28px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+/* Back to Dashboard Button */
+.back-to-dashboard-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.back-to-dashboard-btn:hover {
+  background-color: #0056b3;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+}
+
+.back-to-dashboard-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.back-to-dashboard-btn:focus {
+  outline: 2px solid #0056b3;
+  outline-offset: 2px;
+}
+
+
+.profile-section {
+  background: #f9f9f9;
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section h3 {
+  color: #555;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.profile-field {
+  display: flex;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: white;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+  align-items: baseline;
+}
+
+.field-label {
+  font-weight: 600;
+  min-width: 150px;
+  color: #555;
+  flex-shrink: 0;
+  user-select: none; /* Prevent accidental text selection of labels */
+}
+
+.field-value {
+  color: #333;
+  flex: 1;
+  word-break: break-word;
+  line-height: 1.5;
+  /* Make it clear this is display text, not editable */
+  cursor: default;
+  user-select: text; /* Allow copying values */
+}
+
+/* Ensure no field looks editable */
+.profile-field:hover {
+  /* Subtle hover effect for scanning */
+  background: #fafafa;
+}
+
+/* Loading and error states */
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.loading-message {
+  color: #666;
+}
+
+.error-message {
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid #ef5350;
+}
+
+/* Responsive design for mobile */
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .back-to-dashboard-btn {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 15px;
+  }
+
+  .profile-container {
+    margin: 20px auto;
+    padding: 10px;
+  }
+  
+  .profile-section {
+    padding: 15px;
+  }
+  
+  .profile-field {
+    flex-direction: column;
+    padding: 10px;
+  }
+  
+  .field-label {
+    min-width: auto;
+    margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  .field-value {
+    font-size: 15px;
+  }
+  
+  .profile-container h2 {
+    font-size: 24px;
+  }
+  
+  .profile-section h3 {
+    font-size: 18px;
+  }
+}
+
+/* Print styles - if user wants to print their profile */
+@media print {
+  .profile-container {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .profile-section {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
+  }
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .messages-container {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  
+  .conversations-panel {
+    max-height: 400px;
+  }
+  
+  .message-thread-panel {
+    min-height: 500px;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .conversation-item {
+    transition: none;
+  }
+  
+  .conversation-item:hover {
+    transform: none;
+  }
+}

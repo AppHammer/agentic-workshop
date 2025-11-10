@@ -552,6 +552,93 @@ label {
   text-align: center;
 }
 
+/* Profile Page Styles */
+.profile-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.profile-container h2 {
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 28px;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.profile-section {
+  background: #f9f9f9;
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section h3 {
+  color: #555;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+
+.profile-field {
+  display: flex;
+  margin-bottom: 15px;
+  padding: 12px;
+  background: white;
+  border-radius: 4px;
+  border-left: 3px solid #007bff;
+}
+
+.field-label {
+  font-weight: 600;
+  min-width: 150px;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.field-value {
+  color: #333;
+  flex: 1;
+  word-break: break-word;
+}
+
+.loading-message,
+.error-message {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.loading-message {
+  color: #666;
+}
+
+.error-message {
+  color: #d32f2f;
+  background: #ffebee;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+/* Responsive design for profile on mobile */
+@media (max-width: 768px) {
+  .profile-container {
+    margin: 20px auto;
+    padding: 10px;
+  }
+  
+  .profile-field {
+    flex-direction: column;
+  }
+  
+  .field-label {
+    min-width: auto;
+    margin-bottom: 5px;
+  }
+}
+
 /* Responsive design for smaller screens */
 @media (max-width: 768px) {
   .messages-container {

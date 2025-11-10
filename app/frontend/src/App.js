@@ -8,6 +8,7 @@ import TaskList from './components/TaskList';
 import TaskDetail from './components/TaskDetail';
 import Messages from './components/Messages';
 import Navbar from './components/Navbar';
+import Profile from './components/Profile';
 import { getCurrentUser } from './api';
 
 function App() {
@@ -79,9 +80,13 @@ function App() {
             path="/tasks/:id" 
             element={user ? <TaskDetail user={user} /> : <Navigate to="/login" />} 
           />
-          <Route 
-            path="/messages" 
-            element={user ? <Messages user={user} /> : <Navigate to="/login" />} 
+          <Route
+            path="/messages"
+            element={user ? <Messages user={user} /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/profile"
+            element={user ? <Profile /> : <Navigate to="/login" />}
           />
         </Routes>
       </div>

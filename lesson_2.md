@@ -32,10 +32,18 @@ Write a feature to allow users to view their profile when logged in. Make their 
       Also the user does not need to view other users profiles.
 6. Reset the working directory to before the profile feature was added. `git reset --hard HEAD`
 7. Now let's implement the same feature using our AI command methodology.
-    1. `/generate-feature-requirement` 
+    1. Using roo `Architect` with `Sonnet 4.5` model, run the `/generate-feature-requirement` command.
        Write a feature to allow users to view their profile when logged  Make their user name clickable and display user information from the User class in @backend/models.py.
        This feature only needs to support the current logged in user viewing their own  profile, not editing it. Also the user does not need to view other users profiles.
-    
+    2. Review the feature requirements document generated in `docs/v0.0.1/feature_requirements.md` and make any necessary edits.
+    3. Using roo `Architect` with `Sonnet 4.5` model, run the `/generate-user-stories v0.0.1` command. This breaks down the feature requirements into user stories.
+    4. Review the generated user stories generated in `docs/v0.0.1/user_stories.md` and make any necessary edits.
+    5. Using roo `Architect` with `Sonnet 4.5` model, run the `/generate-technical-requirements v0.0.1` command. This creates a github issue for each user story with technical requirements. Instead of github the command makes an issue in the `docs/v0.0.1/issues/` folder.
+    6. Review each generated issue in `docs/v0.0.1/issues/` and make any necessary edits. These will be coded next.
+    7. For each issue:
+        1. Implement the issue using roo `code` mode with `Sonnet 4.5` model. `/implement-issue <issue_number`
+    8. All issues done, test the app with a final review. Is the feature acceptable?
+
 
 
 ## Takeaways:

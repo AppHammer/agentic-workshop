@@ -337,3 +337,24 @@ body {
 .link:hover {
   text-decoration: underline;
 }
+
+/* Profile username link styling */
+.username-link {
+  color: white;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.username-link:hover {
+  background-color: #34495e;
+  text-decoration: underline;
+}
+
+.username-link:focus {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+  border-radius: 4px;
+}

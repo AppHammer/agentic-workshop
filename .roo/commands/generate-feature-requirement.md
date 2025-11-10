@@ -7,7 +7,7 @@ description: Comprehensive workflow for gathering, documenting, and implementing
 
 Generate a detailed project structure document.
 
-YOU MUST FIRST OPEN AND ANALYZE THE .roo/templates/feature_requirements_template.md TEMPLATE AND INSTRUCTIONS.
+YOU MUST FIRST OPEN AND ANALYZE THE .roo/templates/feature-requirements-template.md TEMPLATE AND INSTRUCTIONS.
 IF YOU CAN'T FIND THE TEMPLATE FILE STOP AND ASK THE USER FOR THE LOCATION
 
 IF YOU ANALYZED THE TEMPLATE YOU CAN CONTINUE, further instructions will refer to the template as <TEMPLATE>

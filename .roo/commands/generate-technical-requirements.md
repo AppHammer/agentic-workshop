@@ -10,7 +10,7 @@ Switch to the correct subagent
 
 Generate a detailed project structure document.
 
-YOU MUST FIRST OPEN AND ANALYZE THE .roo/templates/github_issue_template.md TEMPLATE AND INSTRUCTIONS.
+YOU MUST FIRST OPEN AND ANALYZE THE .roo/templates/github-issue-template.md TEMPLATE AND INSTRUCTIONS.
 IF YOU CAN'T FIND THE TEMPLATE FILE STOP AND ASK THE USER FOR THE LOCATION
 
 IF YOU ANALYZED THE TEMPLATE YOU CAN CONTINUE, further instructions will refer to the template as <TEMPLATE>

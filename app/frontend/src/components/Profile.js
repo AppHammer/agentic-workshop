@@ -37,6 +37,12 @@ function Profile() {
     return role.charAt(0).toUpperCase() + role.slice(1);
   };
 
+  // Format hourly rate as currency
+  const formatRate = (rate) => {
+    if (!rate || rate === 0) return 'Not provided';
+    return `$${parseFloat(rate).toFixed(2)}`;
+  };
+
   if (loading) {
     return (
       <div className="profile-container">
@@ -98,6 +104,29 @@ function Profile() {
           <span className="field-value">{formatDate(user.created_at)}</span>
         </div>
       </div>
+      
+      {user.role === 'tasker' && (
+        <div className="profile-section">
+          <h3>Professional Information</h3>
+          
+          <div className="profile-field">
+            <label className="field-label">Skills:</label>
+            <span className="field-value">{user.skills || 'Not provided'}</span>
+          </div>
+          
+          <div className="profile-field">
+            <label className="field-label">Hourly Rate:</label>
+            <span className="field-value">{formatRate(user.hourly_rate)}</span>
+          </div>
+          
+          <div className="profile-field">
+            <label className="field-label">Bio:</label>
+            <span className="field-value" style={{ whiteSpace: 'pre-wrap' }}>
+              {user.bio || 'Not provided'}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

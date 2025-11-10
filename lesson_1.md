@@ -28,5 +28,6 @@ In this lesson, we will be building a simple application while addressing some c
 
 - Hit or miss coding with AI, inconsistent results:
   - when you are not specific enough
-  - when you use models or parameters on that model.
-- Even the best AI models can produce errors will not get complex applications right.
+  - when you use different models or parameters on that model.
+- Even the best AI models can produce errors and will not get complex applications right.
+- Models training has a current cutoff date, and may not be aware of the latest libraries or best practices.

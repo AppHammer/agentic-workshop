@@ -1,4 +1,4 @@
-Lesson 2: Introducting Commands
+Lesson 2: Introducting Commands and Context
 
 Why Commands:
 - Contextual Efficiency

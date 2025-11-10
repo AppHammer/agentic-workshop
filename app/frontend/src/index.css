@@ -148,6 +148,22 @@ label {
 .nav-links a:hover {
   background-color: #555;
 }
+/* Username link hover effect in navbar */
+.nav a[href="/profile"] {
+  transition: opacity 0.2s ease-in-out;
+}
+
+.nav a[href="/profile"]:hover {
+  text-decoration: underline;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.nav a[href="/profile"]:focus {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
 
 .grid {
   display: grid;

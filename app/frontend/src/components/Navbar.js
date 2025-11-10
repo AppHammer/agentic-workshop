@@ -10,9 +10,9 @@ function Navbar({ user, onLogout }) {
           <Link to="/">Dashboard</Link>
           <Link to="/tasks">Browse Tasks</Link>
           <Link to="/messages">Messages</Link>
-          <span style={{ color: 'white' }}>
+          <Link to="/profile" style={{ color: 'white', textDecoration: 'none' }}>
             {user.full_name} ({user.role})
-          </span>
+          </Link>
           <button onClick={onLogout} className="btn-secondary">
             Logout
           </button>

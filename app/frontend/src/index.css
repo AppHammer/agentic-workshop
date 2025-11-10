@@ -552,7 +552,7 @@ label {
   text-align: center;
 }
 
-/* Profile Page Styles */
+/* Profile Page Styles - Enhanced for Read-Only Display */
 .profile-container {
   max-width: 800px;
   margin: 40px auto;
@@ -580,6 +580,7 @@ label {
   margin-top: 0;
   margin-bottom: 20px;
   font-size: 20px;
+  font-weight: 600;
 }
 
 .profile-field {
@@ -589,6 +590,7 @@ label {
   background: white;
   border-radius: 4px;
   border-left: 3px solid #007bff;
+  align-items: baseline;
 }
 
 .field-label {
@@ -596,14 +598,26 @@ label {
   min-width: 150px;
   color: #555;
   flex-shrink: 0;
+  user-select: none; /* Prevent accidental text selection of labels */
 }
 
 .field-value {
   color: #333;
   flex: 1;
   word-break: break-word;
+  line-height: 1.5;
+  /* Make it clear this is display text, not editable */
+  cursor: default;
+  user-select: text; /* Allow copying values */
 }
 
+/* Ensure no field looks editable */
+.profile-field:hover {
+  /* Subtle hover effect for scanning */
+  background: #fafafa;
+}
+
+/* Loading and error states */
 .loading-message,
 .error-message {
   text-align: center;
@@ -620,22 +634,55 @@ label {
   background: #ffebee;
   border-radius: 8px;
   padding: 20px;
+  border: 1px solid #ef5350;
 }
 
-/* Responsive design for profile on mobile */
+/* Responsive design for mobile */
 @media (max-width: 768px) {
   .profile-container {
     margin: 20px auto;
     padding: 10px;
   }
   
+  .profile-section {
+    padding: 15px;
+  }
+  
   .profile-field {
     flex-direction: column;
+    padding: 10px;
   }
   
   .field-label {
     min-width: auto;
     margin-bottom: 5px;
+    font-size: 14px;
+  }
+  
+  .field-value {
+    font-size: 15px;
+  }
+  
+  .profile-container h2 {
+    font-size: 24px;
+  }
+  
+  .profile-section h3 {
+    font-size: 18px;
+  }
+}
+
+/* Print styles - if user wants to print their profile */
+@media print {
+  .profile-container {
+    max-width: 100%;
+    margin: 0;
+  }
+  
+  .profile-section {
+    box-shadow: none;
+    border: 1px solid #ddd;
+    page-break-inside: avoid;
   }
 }
 

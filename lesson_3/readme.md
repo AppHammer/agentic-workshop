@@ -1,6 +1,8 @@
-Lesson 1: Lets vibecode an app!
+Lesson 3a: Agents
 
-What are we building?
+Why are we using agents
 
-The prompt:
+
+
+Lesson 3b: MCPs - Agent tools
 

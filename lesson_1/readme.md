@@ -4,3 +4,9 @@ What are we building?
 
 The prompt:
 
+
+Take aways:
+
+
+
+

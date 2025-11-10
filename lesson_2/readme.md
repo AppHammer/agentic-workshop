@@ -1,6 +1,15 @@
-Lesson 1: Lets vibecode an app!
+Lesson 2: Introducting Commands
 
-What are we building?
+Why Commands:
+- Contextual Efficiency
+- How to use the @
+- Why is context so important
 
-The prompt:
+The commands we are going to use:
 
+
+Take aways:
+
+
+Lets make it better:
+- From idea to spec driven development

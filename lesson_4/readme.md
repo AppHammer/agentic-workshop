@@ -1,6 +1,8 @@
-Lesson 1: Lets vibecode an app!
+Lesson 4: Memory
 
-What are we building?
+Why memory?
+How to use it?
 
-The prompt:
+The Simple Setups, just using prompts
+
 

@@ -216,9 +216,9 @@ __marimo__/
 .streamlit/secrets.toml
 
 
-# Sqllite database files
-*.sqlite3
-*.db
+# # Sqllite database files
+# *.sqlite3
+# *.db
 
 # node_modules
 node_modules/

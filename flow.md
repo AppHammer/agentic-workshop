@@ -3,7 +3,7 @@
 ## First steps:
 - Walk throught the repo
 - Explain the repo
-- Explain the branches
+- Explain the folders
 
 ## 1.0 start with initial commit just an idea in the docs/tasker.md
 
@@ -22,7 +22,7 @@
 - pip freeze to show passlib is "too new" downgrade to 4.3.0 of bcrypt
 - Boom Tests pass. Problem solved.
 
-## 2.0 Leveraging Roo Commands 
+## 2.0 Leveraging Roo Commands
 
 First let's generate some project documentation to set the context for the AI.
 

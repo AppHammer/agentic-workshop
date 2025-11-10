@@ -1,5 +1,9 @@
 # Walkthbough
 
+## First steps:
+- Walk throught the repo
+- Explain the repo
+- Explain the branches
 
 ## 1.0 start with initial commit just an idea in the docs/tasker.md
 
@@ -99,7 +103,8 @@ Agents adopt a persona to perform specific tasks.  Think of common software deve
 - Product Manager - defines features, prioritizes backlog, writes user stories.
 - Technical Lead - defines technical requirements, reviews architecture, ensures best practices.
 - Developer - implements user stories, writes code.
-- QA Tester - writes and runs tests, ensures quality.
+- QA Test Writer - reviews the acceptance criteria, reviews the code and creates tests for the QA engineer to execute.
+- QA Engineer - writes and runs tests, ensures quality.
 
 
 From the agent side, from  our previous example:
@@ -115,4 +120,7 @@ Custom agents help us to:
 - Specialize tasks - each agent has a specific role and expertise.
 - Improve quality - specialized agents can focus on best practices in their domain.
 - Reduce costs - specialized agents can be more efficient and cost-effective using the right models for their tasks.
+- Utilize context efficiently
+
+### 4.0 MCP
 

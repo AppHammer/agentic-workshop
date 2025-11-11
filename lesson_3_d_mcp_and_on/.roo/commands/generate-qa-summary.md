@@ -25,8 +25,9 @@ For each phase below, do NOT continue to the next phase until all steps are comp
 4. Using the tools avaialble to you, review the ./docs/<version>/user_stories.md
 5. Using the tools available to you, review the ./docs/<version>/design.md
 6. Using the tools avaialble to you, review all of the issues ./docs/[version]/issues/*
-5. Review the gathered information and ensure you have a complete understanding about the technical requirements required to complete the testing and qa of the current feature
-4. Review the <TEMPLATE> and make ensure you have all of the information required to fill out the <TEMPLATE> for each required task.
+7. Using the tools avaialble to you, review all of the implementation docs ./docs/[version]/implementation/*
+8. Review the gathered information and ensure you have a complete understanding about the technical requirements required to complete the testing and qa of the current feature
+9. Review the <TEMPLATE> and make ensure you have all of the information required to fill out the <TEMPLATE> for each required task.
 
 ## Phase 2: Test the application
 

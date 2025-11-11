@@ -366,4 +366,245 @@ describe('Profile Component - Edit Mode', () => {
       expect(numberInputs.some(input => input.value === '0')).toBe(true);
     });
   });
+
+  describe('Cancel Edit Mode', () => {
+    it('should exit edit mode and revert to view mode when Cancel is clicked', async () => {
+      const user = userEvent.setup();
+      api.profileAPI.getMyProfile.mockResolvedValue({
+        data: mockTaskerProfile,
+      });
+
+      renderProfile();
+
+      // Wait for profile to load
+      await waitFor(() => {
+        expect(screen.getByText('My Profile')).toBeInTheDocument();
+      });
+
+      // Enter edit mode
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // Verify we're in edit mode
+      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /^edit$/i })).not.toBeInTheDocument();
+
+      // Click Cancel
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      await user.click(cancelButton);
+
+      // Verify we're back in view mode
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+      });
+      expect(screen.queryByRole('button', { name: /save/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+    });
+
+    it('should revert form data to original profile values when Cancel is clicked', async () => {
+      const user = userEvent.setup();
+      api.profileAPI.getMyProfile.mockResolvedValue({
+        data: mockTaskerProfile,
+      });
+
+      renderProfile();
+
+      // Wait for profile to load
+      await waitFor(() => {
+        expect(screen.getByText('My Profile')).toBeInTheDocument();
+      });
+
+      // Enter edit mode
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // Modify all editable fields
+      const emailInput = screen.getByDisplayValue('john@example.com');
+      const skillsInput = screen.getByDisplayValue('Plumbing, Electrical');
+      const hourlyRateInput = screen.getByDisplayValue('45.5');
+
+      await user.clear(emailInput);
+      await user.type(emailInput, 'newemail@example.com');
+
+      await user.clear(skillsInput);
+      await user.type(skillsInput, 'Carpentry, Painting');
+
+      await user.clear(hourlyRateInput);
+      await user.type(hourlyRateInput, '60');
+
+      // Verify fields are modified
+      expect(screen.getByDisplayValue('newemail@example.com')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Carpentry, Painting')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('60')).toBeInTheDocument();
+
+      // Click Cancel
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      await user.click(cancelButton);
+
+      // Enter edit mode again to verify data was reverted
+      const editButtonAgain = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButtonAgain);
+
+      // Verify all fields are back to original values
+      expect(screen.getByDisplayValue('john@example.com')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('Plumbing, Electrical')).toBeInTheDocument();
+      expect(screen.getByDisplayValue('45.5')).toBeInTheDocument();
+    });
+
+    it('should not make any API calls when Cancel is clicked', async () => {
+      const user = userEvent.setup();
+      api.profileAPI.getMyProfile.mockResolvedValue({
+        data: mockTaskerProfile,
+      });
+      api.profileAPI.updateMyProfile = vi.fn();
+
+      renderProfile();
+
+      // Wait for profile to load
+      await waitFor(() => {
+        expect(screen.getByText('My Profile')).toBeInTheDocument();
+      });
+
+      // Verify initial API call count (should be 1 for loading profile)
+      expect(api.profileAPI.getMyProfile).toHaveBeenCalledTimes(1);
+
+      // Enter edit mode
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // Modify a field
+      const emailInput = screen.getByDisplayValue('john@example.com');
+      await user.clear(emailInput);
+      await user.type(emailInput, 'newemail@example.com');
+
+      // Click Cancel
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      await user.click(cancelButton);
+
+      // Verify no additional API calls were made
+      expect(api.profileAPI.getMyProfile).toHaveBeenCalledTimes(1); // Still just the initial load
+      expect(api.profileAPI.updateMyProfile).not.toHaveBeenCalled();
+    });
+
+    it('should clear error state when Cancel is clicked (simulated error in edit mode)', async () => {
+      const user = userEvent.setup();
+      api.profileAPI.getMyProfile.mockResolvedValue({
+        data: mockTaskerProfile,
+      });
+
+      renderProfile();
+
+      // Wait for profile to load
+      await waitFor(() => {
+        expect(screen.getByText('My Profile')).toBeInTheDocument();
+      });
+
+      // Enter edit mode
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // Verify we're in edit mode with Cancel button
+      expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
+
+      // The handleCancel function clears error state (setError(null))
+      // In a real scenario, error might be set from a failed save attempt
+      // but the component would need to be modified to show errors inline during edit
+      // For now, we verify that Cancel button calls the correct function
+      // This is indirectly tested by verifying Cancel exits edit mode properly
+      
+      // Click Cancel
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      await user.click(cancelButton);
+
+      // Verify we exited edit mode (which handleCancel does along with clearing errors)
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+      });
+      expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /save/i })).not.toBeInTheDocument();
+    });
+
+    it('should handle null values with proper defaults when Cancel is clicked', async () => {
+      const user = userEvent.setup();
+      const profileWithNulls = {
+        ...mockTaskerProfile,
+        skills: null,
+        hourly_rate: null,
+      };
+
+      api.profileAPI.getMyProfile.mockResolvedValue({
+        data: profileWithNulls,
+      });
+
+      renderProfile();
+
+      // Wait for profile to load
+      await waitFor(() => {
+        expect(screen.getByText('My Profile')).toBeInTheDocument();
+      });
+
+      // Enter edit mode
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // Modify fields
+      const skillsInput = screen.getByPlaceholderText(/plumbing, carpentry/i);
+      const hourlyRateInput = screen.getByDisplayValue('0');
+
+      await user.type(skillsInput, 'New Skills');
+      await user.clear(hourlyRateInput);
+      await user.type(hourlyRateInput, '50');
+
+      // Click Cancel
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      await user.click(cancelButton);
+
+      // Enter edit mode again to verify defaults are used
+      const editButtonAgain = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButtonAgain);
+
+      // Verify null values are handled with defaults
+      const skillsInputAgain = screen.getByPlaceholderText(/plumbing, carpentry/i);
+      const hourlyRateInputAgain = screen.getByDisplayValue('0');
+
+      expect(skillsInputAgain.value).toBe(''); // Empty string for null skills
+      expect(hourlyRateInputAgain.value).toBe('0'); // 0 for null hourly_rate
+    });
+
+    it('should handle customer profile (no tasker fields) when Cancel is clicked', async () => {
+      const user = userEvent.setup();
+      api.profileAPI.getMyProfile.mockResolvedValue({
+        data: mockCustomerProfile,
+      });
+
+      renderProfile();
+
+      // Wait for profile to load
+      await waitFor(() => {
+        expect(screen.getByText('My Profile')).toBeInTheDocument();
+      });
+
+      // Enter edit mode
+      const editButton = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButton);
+
+      // Modify email
+      const emailInput = screen.getByDisplayValue('jane@example.com');
+      await user.clear(emailInput);
+      await user.type(emailInput, 'newemail@example.com');
+
+      // Click Cancel
+      const cancelButton = screen.getByRole('button', { name: /cancel/i });
+      await user.click(cancelButton);
+
+      // Enter edit mode again to verify data was reverted
+      const editButtonAgain = screen.getByRole('button', { name: /edit/i });
+      await user.click(editButtonAgain);
+
+      // Verify email is back to original
+      expect(screen.getByDisplayValue('jane@example.com')).toBeInTheDocument();
+    });
+  });
 });

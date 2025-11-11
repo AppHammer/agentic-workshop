@@ -21,11 +21,8 @@
         "@playwright/mcp@latest",
         "--browser=chromium",
         "--output-dir=.playwright",
-        "--extension",
         "--host",
-        "0.0.0.0",
-        "--executable-path",
-        "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
+        "0.0.0.0"
       ],
       "alwaysAllow": [
         "browser_close",

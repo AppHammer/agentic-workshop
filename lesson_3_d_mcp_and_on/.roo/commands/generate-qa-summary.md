@@ -34,7 +34,8 @@ For each phase below, do NOT continue to the next phase until all steps are comp
 1. For each user story in the application. develop a comprehensive test plan, ignore the previous results the goal is to fully test the feature and ensure it is ready for production deployment.
 2. execute that test plan utlizing the tools that you have available to you.
 3. USE THE PLAYWRIGHT MCP tool to test features e2e. record necessary screenshots and link them to the test in the summary.
-3. determine if the test pass and the feature is ready for deployment, if they do not create a comprehensive bug report to include in the summary and response back to the user.
+4. determine if the test pass and the feature is ready for deployment, if they do not create a comprehensive bug report to include in the summary and response back to the user.
+5. ALL TESTS MUST PASS, INCLUDING THE E2E TESTS, DO NOT ASSUME THE IMPLEMENTATION DOCS ARE CORRECT. all results should be recorded in the summary.
 
 ## Phase 3: Results
 

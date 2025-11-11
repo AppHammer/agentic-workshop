@@ -67,6 +67,7 @@ Using the agents individually to build the feature.
 
 ## Takeaways:
 
+- Agents allow us to control context and requirements for specific tasks. 
 - MCP Servers are awesome! They supply funtionality that are not built in to agents
 - Other MCP servers to play with.
     - Figma

@@ -345,7 +345,7 @@ class TestUserUpdateSchema:
     def test_user_update_schema_exclude_unset(self):
         """Test that exclude_unset works correctly for partial updates."""
         update = schemas.UserUpdate(email="test@example.com")
-        data = update.dict(exclude_unset=True)
+        data = update.model_dump(exclude_unset=True)
         
         # Should only include email, not skills or hourly_rate
         assert "email" in data

@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import { profileAPI } from '../api';
 import '../App.css';
 
@@ -6,22 +8,65 @@ export default function Profile() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
   const fetchProfile = async () => {
+    const startTime = Date.now();
+    
     try {
       setLoading(true);
+      setError(null);
       const response = await profileAPI.getMyProfile();
       setProfile(response.data);
-      setError(null);
     } catch (err) {
       console.error('Error fetching profile:', err);
-      setError(err.response?.data?.detail || 'Failed to load profile');
+      console.error('Error details:', {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        message: err.message
+      });
+      
+      // Handle authentication errors
+      if (err.response?.status === 401) {
+        console.log('Authentication failed, logging out...');
+        logout();
+        navigate('/login', {
+          state: { message: 'Your session has expired. Please login again.' }
+        });
+        return;
+      }
+      
+      // Handle different error types with user-friendly messages
+      let errorMessage = 'Unable to load profile. Please try again.';
+      
+      if (!err.response) {
+        // Network error (no response from server)
+        errorMessage = 'Unable to connect to server. Please check your internet connection and try again.';
+      } else if (err.response.status >= 500) {
+        // Server error
+        errorMessage = 'Server error occurred. Please try again later.';
+      } else if (err.response?.data?.detail) {
+        // Use server-provided error message if available
+        errorMessage = err.response.data.detail;
+      }
+      
+      setError(errorMessage);
     } finally {
-      setLoading(false);
+      // Ensure minimum loading time to prevent flash
+      const elapsedTime = Date.now() - startTime;
+      const minimumLoadTime = 300; // milliseconds
+      
+      if (elapsedTime < minimumLoadTime) {
+        setTimeout(() => setLoading(false), minimumLoadTime - elapsedTime);
+      } else {
+        setLoading(false);
+      }
     }
   };
 
@@ -66,11 +111,21 @@ export default function Profile() {
   if (error) {
     return (
       <div className="container">
-        <div className="error-message">
-          <p>{error}</p>
-          <button onClick={fetchProfile} className="retry-button">
-            Retry
-          </button>
+        <div className="error-container">
+          <div className="error-icon">⚠️</div>
+          <h2 className="error-title">Unable to Load Profile</h2>
+          <p className="error-message">{error}</p>
+          <div className="error-buttons">
+            <button onClick={fetchProfile} className="retry-button">
+              Try Again
+            </button>
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="secondary-button"
+            >
+              Back to Dashboard
+            </button>
+          </div>
         </div>
       </div>
     );

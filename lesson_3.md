@@ -38,7 +38,7 @@ Using the agents individually to build the feature.
 ## Steps D
 
 1. Install playwright mcp
-2. provide the qa agent more context and instrucitons
+2. provide the qa agent more context and instructions
     - Add login instructions etc
 3. Rinse and repeat for issues
     - /implement-issue docs/v0.0.2/issues/v0.0.2-1-1.md

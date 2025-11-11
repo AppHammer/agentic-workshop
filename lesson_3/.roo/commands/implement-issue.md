@@ -1,58 +1,113 @@
 ---
 argument-hint: <issue-number>
-description: Complete end-to-end implementation of a GitHub issue with testing and validation
+description: Complete end-to-end implementation of a issue with testing and validation
+sub-agent: orchestrator
 ---
+
+FIRST SWITCH TO ORCHESTRATOR MODE
 
 ## Description
 
-This command orchestrates a comprehensive workflow to implement, test, and validate an issue. It manages the entire development lifecycle from requirement analysis to pull request creation. The issues can be found in the issues directory ../docs/<version>/issues/<issue-number>.md
+This command orchestrates a comprehensive workflow to implement, test, and validate an issue. It manages the entire development lifecycle from requirement analysis to pull request creation. The issues can be found in the issues directory ..docs/<version>/issues/<issue-number>.md
 
-## Workflow Phases
+Here is the workflow definition in YAML:
 
-### Phase 1: Requirement Analysis & Implementation
+```yaml
+---
+workflow_name: Resolve and Deploy Issue
+input_issue: .docs/<version>/issues/<issue-number>.md
 
-1. **Issue Analysis**:
-   - Reviews the issue contents thoroughly
-   - Extracts requirements, deliverables, and acceptance criteria
-   - Understands technical scope and dependencies
+agents:
+  - id: arch
+    name: architect
+  - id: dev
+    name: code
+  - id: qa
+    name: qa-engineer
 
-2. **Create a new branch**
-   - Create a new branch with the issue number using `git checkout -b <issue_number>-descriptive-name`
-   - Commit current uncommitted files into the new branch
+artifacts:
+  - name: project_structure
+    desctiption: "The structure of the project"
+    location: ./project_structure.md
+  - name: tech_stack
+    desctiption: "The tech stack of the current application"
+    location: ./tech_stack.md
+  - name: design_doc
+    description: "A comprehensive design doc for the feature"
+    location: .docs/<version>/design.md
+  - name: code_summary
+    description: "The summary of the code and what changed, including unit tests written and how to execute"
+  - name: qa_report
+    description: "A structured report with status ('PASS' or 'FAIL') and a list of required fixes. and a deployment recommendation"
+    template: .roo/templates/qa-summary-template.md
 
-3. **Implementation**:
-   - Use a coding agent specialized in the relevant technology stack if available
-   - Understand the Existing Codebase: Before starting, take the time to understand the relevant parts of the existing application. Pay attention to the current models, views, forms, URLs, templates, installed modules, and any existing tests.
-   - Adhere to Best Practices: * DRY (Don't Repeat Yourself): Avoid duplicating code. Identify and reuse existing components or create new reusable ones. * SOLID: Follow the SOLID (Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion) principals * Modularity: Ensure your changes are well-organized and don't tightly couple new code with unrelated parts of the application. * Secure Ensure all endpoints are properly protected with authentication if required.
-   - Implement the Task: Write the necessary code to implement the specified task. This might involve modifying existing files or creating new ones (e.g., new views, forms, tests).
-   - Integration: Ensure your changes seamlessly integrate with the existing application. This includes: * Properly connecting new views through URLs. * Modifying templates to display new data or functionality. * Ensuring forms correctly handle new or modified data.
+steps:
+  - step_name: GATHER_REQUIREMENTS
+    agent_id: arch
+    input:
+      - input_issue
+    action: |
+      Analyze the INPUT_ISSUE. 
+      Consult the software architect persona for architectural constraints, data models, and API contracts.
+      review the project_stucture, tech_stack, and design_doc to ensure the INPUT_ISSUE instructions align with the feature requirements and follows the proper coding practices in the code base.
+      Produce a succinct 'specs_doc' with all information and clear acceptance criteria needed for a developer to begin work.
+    output:
+      - specs_doc
 
-4. **Summary**:
-   - Create an implementation summary document including:
-     - Overview of changes made
-     - Files created/modified
-     - Deployment notes
-     - Rollback plan
-     - Future enhancement suggestions
-   - add the summary to `docs/<version>/<issue-number>-summary.md`
+  - step_name: INITIAL_DEVELOPMENT
+    agent_id: dev
+    input:
+      - specs_doc
+    action: |
+      Write the complete code, including all necessary functions, classes, and unit tests, 
+      to satisfy 100% of the requirements and acceptance criteria in the 'specs_doc'.
+    output:
+      - code_summary
 
+  - step_name: QA_LOOP
+    type: loop
+    condition: "artifacts.qa_report.status != 'PASS'"
+    # This loop will continue as long as the QA report is not 'PASS'
+    # It assumes the first run will have no qa_report, so the loop executes at least once.
+    sub_steps:
+      - step_name: PERFORM_QA
+        agent_id: qa
+        input:
+          - code_bundle
+          - specs_doc
+        action: |
+          review the artifacts.qa_report.template, and ensure you have all the infomration required to fill it out
 
-### Phase 2: Test Plan Creation
+          Perform a full analysis:
+          1. Review 'code_bundle' for quality, maintainability, and security.
+          2. Run all unit tests.
+          3. Analyze the code against the 'specs_doc' to ensure all requirements are met.
+          4. Perform functional and interface QA.
+          5. Produce a 'qa_report' with a binary status: 'PASS' or 'FAIL'.
+          6. If 'FAIL', provide a clear, actionable list of 'required_fixes'.
+        output:
+          - qa_report
 
-1. **Test Documentation**:
-   - Uses test-coverage-engineer agent
-   - Creates comprehensive test document including:
-     - Feature summary and acceptance criteria
-     - Positive test cases for core functionality
-     - Negative test cases for error handling
-     - Edge case scenarios
-     - Clear test steps and expected results
-   
+      - step_name: CONDITIONAL_FIX
+        type: conditional
+        if: "artifacts.qa_report.status == 'FAIL'"
+        then:
+          agent_id: dev
+          input:
+            - code_bundle
+            - "artifacts.qa_report.required_fixes"
+          action: |
+            Implement all fixes listed in the 'required_fixes' report. 
+            Do not add new features. Return the updated code.
+          output:
+            - code_bundle # This updates the code_bundle for the next loop iteration
 
-
-## Success Criteria
-
-- All issue requirements implemented and tested
-- Comprehensive test coverage with passing results
-- Clean pull request ready for code review
-- Proper linking and documentation of all changes
+  - step_name: FINAL_REPORT
+    agent_id: "orchestrator" # Or just a final reporting step
+    input:
+      - code_summary
+      - qa_report
+    action: |
+      save the summary and qa_report to .docs/<version>/implementation/<issue-number>-summary.md
+      Report to the user: 'QA_LOOP has passed. The following artifacts are ready for deployment.'
+```

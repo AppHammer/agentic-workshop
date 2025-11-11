@@ -1,18 +1,4 @@
-Here is a robust Markdown template you can use for your QA review process. It includes the sections you requested, along with explicit instructions (in blockquotes) on how to fill out each part.
-
-You can copy and paste the text below directly into a `.md` file, your wiki, or a GitHub pull request comment.
-
-```markdown
-# QA Review: [Feature/Ticket Name]
-
-* **Ticket:** [Link to JIRA/Trello/GitHub Issue]
-* **QA Reviewer:** [Your Name]
-* **Date:** YYYY-MM-DD
-* **Feature Branch:** [Link to Branch/PR]
-
----
-
-## 1. Coder Review and Analysis Findings
+## 1. Code Review and Analysis Findings
 
 > **Instructions:** Fill this section *before* starting test execution. Review the developer's pull request (PR), check for unit tests, and analyze the code changes to identify potential risk areas. This is your static analysis.
 

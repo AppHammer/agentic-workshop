@@ -3,6 +3,9 @@ argument-hint: <feature-request>
 description: Comprehensive workflow for gathering, documenting, and implementing product requirements
 ---
 
+
+SWITCH TO PRODUCT-MANAGER mode
+
 # Instructions
 
 Generate a detailed project structure document.

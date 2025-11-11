@@ -86,6 +86,22 @@ def get_user_profile(current_user: models.User = Depends(get_current_user)):
         HTTPException: 401 if authentication fails
     """
     return current_user
+@app.put("/users/me", response_model=schemas.UserProfile)
+def update_user_profile(
+    user_data: schemas.UserUpdate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update the current user's profile information."""
+    update_data = user_data.dict(exclude_unset=True)
+    
+    for field, value in update_data.items():
+        setattr(current_user, field, value)
+    
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 
 
 # Task endpoints

@@ -31,6 +31,7 @@ export const authAPI = {
 
 export const profileAPI = {
   getMyProfile: () => api.get('/users/me/profile'),
+  updateMyProfile: (data) => api.put('/users/me', data),
 };
 
 export const taskAPI = {

@@ -56,7 +56,7 @@ Using the agents individually to build the feature.
 2. Test that playwright is setup:
     - Switch to QA Engineer mode and test playwright.
     - test that playwright works by navigating and takeing a screenshot of apphammer.co
-    - IF NOT: you may need to run npx -y playwright@1.48.2 install chromium
+    - IF NOT: you may need to run npx playwright install chromium --with-deps
 2. Rinse and repeat for issues
     - /implement-issue docs/v0.0.2/issues/v0.0.2-1-2.md
     - /implement-issue docs/v0.0.2/issues/v0.0.2-1-3.md
@@ -67,3 +67,8 @@ Using the agents individually to build the feature.
 ## Takeaways:
 
 - MCP Servers are awesome! They supply funtionality that are not built in to agents
+- Other MCP servers to play with.
+    - Figma
+    - Github
+    - sequentialthinking
+    - serena

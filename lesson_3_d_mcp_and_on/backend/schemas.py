@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List
 from datetime import datetime
 from models import UserType, TaskStatus, BidStatus
@@ -38,6 +38,12 @@ class UserProfile(BaseModel):
     
     class Config:
         from_attributes = True
+
+class UserUpdate(BaseModel):
+    """Schema for partial user profile updates"""
+    email: Optional[EmailStr] = None
+    skills: Optional[str] = None
+    hourly_rate: Optional[float] = Field(None, gt=0)
 
 
 # Task schemas

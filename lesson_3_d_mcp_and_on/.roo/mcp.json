@@ -18,7 +18,14 @@
       "command": "npx",
       "args": [
         "-y",
-        "@playwright/mcp@0.0.38"
+        "@playwright/mcp@latest",
+        "--browser=chromium",
+        "--output-dir=.playwright",
+        "--extension",
+        "--host",
+        "0.0.0.0",
+        "--executable-path",
+        "/mnt/c/Program Files/Google/Chrome/Application/chrome.exe"
       ],
       "alwaysAllow": [
         "browser_close",

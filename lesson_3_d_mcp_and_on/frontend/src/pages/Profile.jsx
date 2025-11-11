@@ -121,6 +121,46 @@ export default function Profile() {
     setIsEditing(true);
   };
 
+  /**
+   * Cancel edit mode and reset form data to profile values
+   */
+  const handleCancel = () => {
+    setFormData({
+      email: profile.email || '',
+      skills: profile.skills || '',
+      hourly_rate: profile.hourly_rate || 0,
+    });
+    setIsEditing(false);
+    setError(null);
+  };
+
+  /**
+   * Save profile changes by sending only modified fields to the server
+   */
+  const handleSave = async () => {
+    try {
+      setError(null);
+      
+      const updates = {};
+      if (formData.email !== profile.email) updates.email = formData.email;
+      if (formData.skills !== profile.skills) updates.skills = formData.skills;
+      if (formData.hourly_rate !== profile.hourly_rate) updates.hourly_rate = formData.hourly_rate;
+      
+      const response = await profileAPI.updateMyProfile(updates);
+      setProfile(response.data);
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      let errorMessage = 'Failed to save changes. Please try again.';
+      if (err.response?.status === 400 && err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (!err.response) {
+        errorMessage = 'Unable to connect to server. Please check your internet connection.';
+      }
+      setError(errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <div className="container">
@@ -177,8 +217,8 @@ export default function Profile() {
               <input
                 type="email"
                 value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="profile-input"
-                readOnly
               />
             ) : (
               <span className="profile-value">{profile.email}</span>
@@ -208,8 +248,9 @@ export default function Profile() {
                 <input
                   type="text"
                   value={formData.skills}
+                  onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
                   className="profile-input"
-                  readOnly
+                  placeholder="e.g., Plumbing, Carpentry, Electrical"
                 />
               ) : (
                 <span className="profile-value">
@@ -224,8 +265,10 @@ export default function Profile() {
                 <input
                   type="number"
                   value={formData.hourly_rate}
+                  onChange={(e) => setFormData({ ...formData, hourly_rate: parseFloat(e.target.value) || 0 })}
                   className="profile-input"
-                  readOnly
+                  min="0"
+                  step="0.01"
                 />
               ) : (
                 <span className="profile-value">
@@ -239,8 +282,8 @@ export default function Profile() {
         <div className="profile-actions">
           {isEditing ? (
             <>
-              <button className="save-button">Save</button>
-              <button className="cancel-button">Cancel</button>
+              <button onClick={handleSave} className="save-button">Save</button>
+              <button onClick={handleCancel} className="cancel-button">Cancel</button>
             </>
           ) : (
             <button onClick={handleEdit} className="edit-button">Edit</button>

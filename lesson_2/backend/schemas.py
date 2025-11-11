@@ -26,19 +26,6 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
-class UserProfile(BaseModel):
-    """Complete user profile schema with all fields"""
-    id: int
-    username: str
-    email: EmailStr
-    user_type: UserType
-    created_at: datetime
-    skills: Optional[str] = None
-    hourly_rate: Optional[float] = None
-    
-    class Config:
-        from_attributes = True
-
 
 # Task schemas
 class TaskBase(BaseModel):

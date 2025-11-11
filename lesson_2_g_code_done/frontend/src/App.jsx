@@ -9,6 +9,7 @@ import CreateTask from './pages/CreateTask';
 import MyBids from './pages/MyBids';
 import Agreements from './pages/Agreements';
 import Messages from './pages/Messages';
+import Profile from './pages/Profile';
 import Navigation from './components/Navigation';
 import './App.css';
 
@@ -37,6 +38,7 @@ function AppRoutes() {
           <Route path="/my-bids" element={<PrivateRoute><MyBids /></PrivateRoute>} />
           <Route path="/agreements" element={<PrivateRoute><Agreements /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         </Routes>
       </div>
     </Router>

@@ -27,13 +27,9 @@ function Navigation() {
           )}
           <Link to="/agreements">Agreements</Link>
           <Link to="/messages">Messages</Link>
-          <Link
-            to="/profile"
-            className="username-link"
-            aria-label="View my profile"
-          >
+          <span style={{color: 'white'}}>
             {user.username} ({user.user_type})
-          </Link>
+          </span>
           <button onClick={handleLogout}>Logout</button>
         </div>
       </div>

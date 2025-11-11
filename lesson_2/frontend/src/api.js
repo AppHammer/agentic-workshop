@@ -29,10 +29,6 @@ export const authAPI = {
   getCurrentUser: () => api.get('/users/me'),
 };
 
-export const profileAPI = {
-  getMyProfile: () => api.get('/users/me/profile'),
-};
-
 export const taskAPI = {
   create: (data) => api.post('/tasks', data),
   list: (status) => api.get('/tasks', { params: { status } }),

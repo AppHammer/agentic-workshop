@@ -74,19 +74,6 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @app.get("/users/me", response_model=schemas.User)
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return current_user
-@app.get("/users/me/profile", response_model=schemas.UserProfile)
-def get_user_profile(current_user: models.User = Depends(get_current_user)):
-    """
-    Get the complete profile of the currently authenticated user.
-    
-    Returns:
-        UserProfile: Complete user profile including tasker-specific fields if applicable
-    
-    Raises:
-        HTTPException: 401 if authentication fails
-    """
-    return current_user
-
 
 # Task endpoints
 @app.post("/tasks", response_model=schemas.Task)

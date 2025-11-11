@@ -93,7 +93,7 @@ def update_user_profile(
     db: Session = Depends(get_db)
 ):
     """Update the current user's profile information."""
-    update_data = user_data.dict(exclude_unset=True)
+    update_data = user_data.model_dump(exclude_unset=True)
     
     for field, value in update_data.items():
         setattr(current_user, field, value)

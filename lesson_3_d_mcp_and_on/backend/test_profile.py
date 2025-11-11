@@ -1,13 +1,16 @@
 import pytest
 from unittest.mock import Mock, MagicMock
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from pydantic import ValidationError
 
 import models
 import schemas
-from main import update_user_profile
+from main import app, update_user_profile
 from auth import create_access_token, get_current_user
+
+client = TestClient(app)
 
 
 class TestUpdateUserProfile:
@@ -393,25 +396,7 @@ class TestAuthenticationRequirement:
     """Test suite to verify authentication is required for the endpoint."""
     
     def test_endpoint_requires_authentication(self):
-        """Test that the endpoint requires authentication via get_current_user dependency."""
-        # This is more of an integration test, but we can verify the dependency exists
-        # In a real scenario, you'd test this with FastAPI TestClient
-        from main import app
-        from fastapi import Depends
-        
-        # Find the route
-        routes = [route for route in app.routes if hasattr(route, 'path') and route.path == '/users/me']
-        assert len(routes) > 0, "Route /users/me should exist"
-        
-        route = routes[0]
-        
-        # Check that it has PUT method
-        assert 'PUT' in route.methods, "Route should support PUT method"
-        
-        # The endpoint function should use get_current_user as a dependency
-        # This verifies it's protected by authentication
-        endpoint = route.endpoint
-        
-        # Verify the endpoint has dependencies including get_current_user
-        # Note: This is a basic check - in practice you'd use TestClient to verify
-        assert endpoint.__name__ == 'update_user_profile'
+        """Test that the PUT /users/me endpoint requires authentication."""
+        # Make a request without authentication - should return 401
+        response = client.put("/users/me", json={})
+        assert response.status_code == 401, "Endpoint should require authentication"

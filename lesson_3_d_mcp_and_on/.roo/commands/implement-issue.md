@@ -85,6 +85,8 @@ steps:
 
           The backend and frontend will need to be run together for testing
 
+          Make sure you check the terminal output for the frontend to know what host and port the app is running on
+
           Perform a full analysis:
           1. Review 'code_bundle' for quality, maintainability, and security.
           2. Run all unit tests.

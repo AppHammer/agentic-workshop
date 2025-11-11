@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
@@ -12,14 +12,37 @@ SECRET_KEY = "your-secret-key-here-change-in-production"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    """
+    Verify a plaintext password against a bcrypt hash.
+    
+    Args:
+        plain_password: The plaintext password to verify
+        hashed_password: The bcrypt hash to verify against
+    
+    Returns:
+        bool: True if password matches, False otherwise
+    """
+    return bcrypt.checkpw(
+        plain_password.encode('utf-8'),
+        hashed_password.encode('utf-8')
+    )
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    """
+    Hash a plaintext password using bcrypt.
+    
+    Args:
+        password: The plaintext password to hash
+    
+    Returns:
+        str: The bcrypt hash as a string (starts with $2b$)
+    """
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()

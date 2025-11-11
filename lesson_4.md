@@ -29,14 +29,16 @@ Lets add memory to the orchestrator agent, so it knows what was done and what th
 1. Into to MCP servers!
 2. Install context 7
 3. Use context 7 and the architect subagent to create a new issue
-    - you have access to context7, the passlib library is causing issues, what is a good replacement?
+    - you have access to context7, the passlib library is causing dependency issues with python 3.13, what is a good replacement?
 4. create new issue
+    - /generate-technical-requirements v0.0.2 Add a new issue based on the recommended approach for our code subagent
 5. Allow team to fix new issue
+    - /implement-issue docs/v0.0.2/issues/v0.0.2-2-1-1.md
 
 ## Steps D
 
 1. Install playwright mcp
-2. provide the qa agent more context and instrucitons
+2. provide the qa agent more context and instructions
     - Add login instructions etc
 3. Rinse and repeat for issues
     - /implement-issue docs/v0.0.2/issues/v0.0.2-1-1.md

@@ -32,6 +32,8 @@ Using the agents individually to build the feature.
     - you have access to context7, the passlib library is causing issues, what is a good replacement?
 4. create new issue
 5. Allow team to fix new issue
+    - /implement-issue docs/v0.0.2/issues/v0.0.2-2-1-1.md
+6. Should work!
 
 ## Steps D
 

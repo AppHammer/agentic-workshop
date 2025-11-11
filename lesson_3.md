@@ -1,48 +1,30 @@
-# Lesson 4: Making the user profile editable
+# Lesson 3: Making the user profile editable
 
 Using our agent team to build a full featureset for out app. 
 
 ## What are we building?
 
-Using the agents individually to build the feature. Then 
+Using the agents individually to build the feature.
 
 
-## Steps 
+## Steps A
 
-1. Good AI prompts for Coding:
+1. Switch to product manager mode, run command /generate-feature-requirements 
+    - make the profile view editable on when the user clicks the their name in the menu. The user should be able to update their information and save.
+    - the subagent should ask some clarifing questions
+2. Once the feature requirements are complete, generate user stories, and technical requiremnts using the following commands
+    - /generate-user-stories v0.0.2
+    - /generate-designs v0.0.2
+    - /generate-technical-requirements v0.0.2
 
-    - Provide context about the project. The models have no context.
-    - Clear with details instructions about what you want done.
-    - Specific to the task, scoping it appropriately.
-    - Outline what should and should not be included in the implementation.
+## Steps B
 
-2. Let's generate project documentation to set the context for the AI. This will help the AI understand the project structure and technical requirements better.
-3. Your first commands. Execute these using the `architect` mode with `Sonnet 4.5` model.
-    - `/generate-project-structure` command to generate project structure document. Impotant to set naming conventions, import patterns, code structure patterns, and code organization principles for the AI.
-    - `/generate-project-tech-stack` command to generate tech stack document. Important to set the technology stack, frameworks, libraries, and tools to be used in the project for the AI.
-4. commit working directory before proceeding. `git add . && git commit -m "Generated project structure and tech stack documentation"`
-5. Implement the "Profile" feature using vibe code with the following prompt in roo `code` mode and `Sonnet 4.5` model:
+1. Switch to orchestrator mode.
+    - /implement-issue docs/v0.0.2/issues/v0.0.2-1-1.md
 
-    - Review the @docs/project_structure.md and @docs/project_tech_stack.md to understand the conventions and technologies to be used in this project.
-      Write a feature to allow users to view their profile when logged in. Make their user name clickable and display user information from the User class in @backend/models.py
-      This feature only needs to support the current logged in user viewing their own  profile, not editing it.  
-      Also the user does not need to view other users profiles.
-6. Reset the working directory to before the profile feature was added. `git reset --hard HEAD`
-7. Now let's implement the same feature using our AI command methodology.
-    1. Using roo `Architect` with `Sonnet 4.5` model, run the `/generate-feature-requirement` command.
-       Write a feature to allow users to view their profile when logged  Make their user name clickable and display user information from the User class in @backend/models.py.
-       This feature only needs to support the current logged in user viewing their own  profile, not editing it. Also the user does not need to view other users profiles.
-    2. Review the feature requirements document generated in `docs/v0.0.1/feature_requirements.md` and make any necessary edits.
-    3. Using roo `Architect` with `Sonnet 4.5` model, run the `/generate-user-stories v0.0.1` command. This breaks down the feature requirements into user stories.
-    4. Review the generated user stories generated in `docs/v0.0.1/user_stories.md` and make any necessary edits.
-    5. Using roo `Architect` with `Sonnet 4.5` model, run the `/generate-technical-requirements v0.0.1` command. This creates a github issue for each user story with technical requirements. Instead of github the command makes an issue in the `docs/v0.0.1/issues/` folder.
-    6. Review each generated issue in `docs/v0.0.1/issues/` and make any necessary edits. These will be coded next.
-    7. For each issue:
-        1. Implement the issue using roo `code` mode with `Sonnet 4.5` model. `/implement-issue <issue_number`
-    8. All issues done, test the app with a final review. Is the feature acceptable?
 
 
 
 ## Takeaways:
 
-- ??
+- 

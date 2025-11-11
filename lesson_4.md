@@ -1,10 +1,10 @@
-# Lesson 3: Making the user profile editable
+# Lesson 4: Memory
 
-Using our agent team to build a full featureset for out app. 
+Bigger tasks, bigger codebases. 
 
 ## What are we building?
 
-Using the agents individually to build the feature.
+Lets add memory to the orchestrator agent, so it knows what was done and what the status are.
 
 
 ## Steps A

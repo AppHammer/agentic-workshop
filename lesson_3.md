@@ -57,11 +57,12 @@ Using the agents individually to build the feature.
     - Switch to QA Engineer mode and test playwright.
     - test that playwright works by navigating and takeing a screenshot of apphammer.co
     - IF NOT: you may need to run npx playwright install chromium --with-deps
-2. Rinse and repeat for issues
+3. Rinse and repeat for issues
     - /implement-issue docs/v0.0.2/issues/v0.0.2-1-2.md
     - /implement-issue docs/v0.0.2/issues/v0.0.2-1-3.md
 
-3. Does it work? You should have seen the agent use playwright to test the issues after completion
+4. Does it work? Lets Check
+    - /generate-qa-summary v0.0.2
 
 
 ## Takeaways:

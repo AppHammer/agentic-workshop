@@ -81,7 +81,9 @@ steps:
           You MUST use the playwright mcp server for all ux testing and validation.
 
           Customer Login: customer1 password123
-          Tasker Login: takser
+          Tasker Login: tasker1 password123
+
+          The backend and frontend will need to be run together for testing
 
           Perform a full analysis:
           1. Review 'code_bundle' for quality, maintainability, and security.

@@ -6,7 +6,7 @@ subagent: qa-engineer
 
 # Instructions
 
-Switch to the correct subagent
+Switch to the correct qa-engineer mode
 
 Generate a detailed project structure document.
 
@@ -24,13 +24,15 @@ For each phase below, do NOT continue to the next phase until all steps are comp
 3. Using the tools available to you, review the ./tech_stack.md
 4. Using the tools avaialble to you, review the ./docs/<version>/user_stories.md
 5. Using the tools available to you, review the ./docs/<version>/design.md
+6. Using the tools avaialble to you, review all of the issues ./docs/[version]/issues/*
 5. Review the gathered information and ensure you have a complete understanding about the technical requirements required to complete the testing and qa of the current feature
 4. Review the <TEMPLATE> and make ensure you have all of the information required to fill out the <TEMPLATE> for each required task.
 
 ## Phase 2: Test the application
 
-1. For each user story in the application. delevlop a comprehensive test plan.
+1. For each user story in the application. develop a comprehensive test plan.
 2. exectute that test plan utlizing the tools that you have available to you.
+3. USE THE PLAYWRIGHT MCP tool to test features e2e. record necessary screenshots and link them to the test in the summary.
 3. determine if the test pass and the feature is ready for deployment, if they do not create a comprehensive bug report to include in the summary and response back to the user.
 
 ## Phase 3: Results

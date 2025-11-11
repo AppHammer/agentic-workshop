@@ -38,14 +38,32 @@ Using the agents individually to build the feature.
 ## Steps D
 
 1. Install playwright mcp
-2. provide the qa agent more context and instructions
-    - Add login instructions etc
-3. Rinse and repeat for issues
-    - /implement-issue docs/v0.0.2/issues/v0.0.2-1-1.md
-    - /implement-issue docs/v0.0.2/issues/v0.0.2-1-1.md
-4. Does it work?
+    - Add to qa agent rules 
+      * **6. E2E Testing:**
+
+      * Use the Playwright MCP server to fully test ux from End 2 End for a feature that requires it.
+      * Record screenshots when testing is desktop mode
+      * Provide feedback and links to screenshots in testing summary.
+    - add to orchestrator
+
+          You MUST use the playwright mcp server for all ux testing and validation.
+
+          Customer Login: customer1 password123
+          Tasker Login: tasker1 password123
+
+          The backend and frontend will need to be run together for testing
+
+2. Test that playwright is setup:
+    - Switch to QA Engineer mode and test playwright.
+    - test that playwright works by navigating and takeing a screenshot of apphammer.co
+    - IF NOT: you may need to run npx -y playwright@1.48.2 install chromium
+2. Rinse and repeat for issues
+    - /implement-issue docs/v0.0.2/issues/v0.0.2-1-2.md
+    - /implement-issue docs/v0.0.2/issues/v0.0.2-1-3.md
+
+3. Does it work? You should have seen the agent use playwright to test the issues after completion
 
 
 ## Takeaways:
 
-- 
+- MCP Servers are awesome! They supply funtionality that are not built in to agents

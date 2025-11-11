@@ -31,7 +31,7 @@ First let's generate some project documentation to set the context for the AI.
 
 ## 2.1 Implement a "Profile" Feature
 
-Good cooding prompts:
+Good coding prompts:
 
 - Provide context about the project. Models have no context.
 - Clear with details instructions about what you want done.
